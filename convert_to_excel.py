@@ -48,6 +48,11 @@
         6. Highlight past dates in red
 
 """
+import pickle
+from openpyxl import Workbook
+
+print ("Start\n") # only for testing purposes
+
 ##############################################################################
 # 1. Unpickle file and place into a dict
 ##############################################################################
@@ -58,3 +63,5 @@
 # 4. Add data to excel file
 ##############################################################################
 # 5. Format data
+##############################################################################
+print ("\nFinished") # only for testing purposes
