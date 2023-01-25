@@ -74,6 +74,35 @@ sorted_data = sorted(data, key=lambda  x: x['start_date'])
 dict_size = len(sorted_data)
 print("size of dict = {}\n".format(dict_size))
 
+# create a list of names to denote the different rows from the sorted data
+number_of_rows = []
+
+# create name of rows based on the size of the sorted data
+for i in range(0,dict_size): # start at 2 because row number 2
+    # name and row number
+    name_part = "data_row_number_"
+    number_part = i + 2
+
+    # final name should look like "data_row_number_4"
+    list_of_dict_name = name_part + str(number_part)
+
+    # add name to the number_of_rows list
+    number_of_rows.append(list_of_dict_name)
+
+individual_row_dict = []
+for i in range(0,dict_size): # start at 0 to index at 0th element in list
+    # print row name
+    print("\n\n{}".format(number_of_rows[i]))
+
+    # create a new dict for each row
+    individual_row_dict.append(dict(sorted_data[i]))
+
+    # print the dict
+    print("    {}\n".format(individual_row_dict[i]))
+
+# print(number_of_rows)
+
+
 ##############################################################################
 # 3. Create an excel file
 
