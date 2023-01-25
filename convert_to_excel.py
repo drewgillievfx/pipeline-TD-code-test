@@ -59,10 +59,13 @@ imported_data = "test_data.pkl"
 
 unpickled_data = open(imported_data, "rb")
 data = pickle.load(unpickled_data)
-print(unp) # check if data is correct
+# print(data) # check if data is correct [works]
 
 ##############################################################################
-# 2. Sort data
+# 2. Sort data by earliest start date
+sorted_data = sorted(data, key=lambda  x: x['Start Date'])
+
+
 ##############################################################################
 # 3. Create an excel file
 ##############################################################################
