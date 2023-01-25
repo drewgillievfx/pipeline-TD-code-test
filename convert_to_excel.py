@@ -55,6 +55,12 @@ print ("Start\n") # only for testing purposes
 
 ##############################################################################
 # 1. Unpickle file and place into a dict
+imported_data = "test_data.pkl"
+
+unpickled_data = open(imported_data, "rb")
+data = pickle.load(unpickled_data)
+print(unp) # check if data is correct
+
 ##############################################################################
 # 2. Sort data
 ##############################################################################
