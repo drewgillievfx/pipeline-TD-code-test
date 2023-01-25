@@ -73,16 +73,19 @@ sorted_data = sorted(data, key=lambda  x: x['start_date'])
 # 3. Create an excel file
 
 wb = Workbook()
-ws = wb.active
+
+# add worksheet
+ws = wb.active 
+
+# change title
 ws.title = "Formatted"
 
 # I may want to do a check to see if file exists ###
-wb.save('converted_data.xlsx')
 
 ##############################################################################
 # 4. Add data to excel file
 
-# Add the column headers
+# Add the column headers and corresponding keys
 column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
 corresponding_keys = ["content", "entity", "sg_parent_build", "start_date", 
                     "due_date"]
@@ -91,5 +94,11 @@ corresponding_keys = ["content", "entity", "sg_parent_build", "start_date",
 
 ##############################################################################
 # 5. Format data
+def title_names_to_excel(input_names):
+    for name in input_names:
+        print(name)
+
+title_names_to_excel(column_names)
 ##############################################################################
+wb.save('converted_data.xlsx')
 print ("\nFinished") # only for testing purposes
