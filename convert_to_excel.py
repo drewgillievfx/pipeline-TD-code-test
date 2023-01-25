@@ -114,11 +114,12 @@ def title_names_to_excel(input_names):
 title_names_to_excel(column_names)
 
 # finding the specific key-values that correlate with the columns in excel
-keys_to_search = [sorted_data.get("content"), # Task Name
-                    sorted_data["entity"].get("code"), # Set Part Name
-                    sorted_data["sg_parent_build"].get("code"), # Parent Build Name
-                    sorted_data.get("start_date"), # Start Date
-                    sorted_data.get("due_date")] # End Date
+keys_to_search = [sorted_data[2].get("content"), # Task Name
+                    sorted_data[2]["entity"].get("code"), # Set Part Name
+                    sorted_data[2]["sg_parent_build"].get("code"), # Parent Build Name
+                    sorted_data[2].get("start_date"), # Start Date
+                    sorted_data[2].get("due_date") # End Date
+                ]
 print (keys_to_search)
 print("List of searchable keys: {}\n".format(keys_to_search))
 
