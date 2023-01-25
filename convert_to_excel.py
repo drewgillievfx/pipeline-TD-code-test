@@ -55,21 +55,40 @@ print ("Start\n") # only for testing purposes
 
 ##############################################################################
 # 1. Unpickle file and place into a dict
+
 imported_data = "test_data.pkl"
 
 unpickled_data = open(imported_data, "rb")
 data = pickle.load(unpickled_data)
-# print(data) # check if data is correct [works]
+# print(data) # [works]
 
 ##############################################################################
 # 2. Sort data by earliest start date
+
 sorted_data = sorted(data, key=lambda  x: x['start_date'])
+# print(sorted_data) # [works]
 
 
 ##############################################################################
 # 3. Create an excel file
+
+wb = Workbook()
+ws = wb.active
+ws.title = "Formatted"
+
+# I may want to do a check to see if file exists ###
+wb.save('converted_data.xlsx')
+
 ##############################################################################
 # 4. Add data to excel file
+
+# Add the column headers
+column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
+corresponding_keys = ["content", "entity", "sg_parent_build", "start_date", 
+                    "due_date"]
+# print (column_names)
+# print (corresponding_keys)
+
 ##############################################################################
 # 5. Format data
 ##############################################################################
