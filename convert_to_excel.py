@@ -50,6 +50,8 @@
 """
 import pickle
 from openpyxl import Workbook
+from openpyxl.utils import column_index_from_string
+from openpyxl.utils import get_column_letter
 
 print ("Start\n") # only for testing purposes
 
@@ -94,9 +96,22 @@ corresponding_keys = ["content", "entity", "sg_parent_build", "start_date",
 
 ##############################################################################
 # 5. Format data
+
+# Function to pass column headers from dict to excel 
 def title_names_to_excel(input_names):
+    column_index = 0 # setting counter iter for stringed loop
+
     for name in input_names:
-        print(name)
+        # print(name)
+
+        column_index += 1
+
+        column_letter = get_column_letter(column_index)
+        # column_index = column_index_from_string(name)
+    
+        ws.cell(row=1, column=column_index, value=name)
+        # print(column_letter)
+
 
 title_names_to_excel(column_names)
 ##############################################################################
