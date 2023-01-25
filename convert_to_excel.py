@@ -72,7 +72,7 @@ sorted_data = sorted(data, key=lambda  x: x['start_date'])
 
 # get size of dict - may or may not be useful later
 dict_size = len(sorted_data)
-print("size of dict = {}\n".format(dict_size))
+# print("size of dict = {}\n".format(dict_size))
 
 # create a list of names to denote the different rows from the sorted data
 number_of_rows = []
@@ -89,18 +89,30 @@ for i in range(0,dict_size): # start at 2 because row number 2
     # add name to the number_of_rows list
     number_of_rows.append(list_of_dict_name)
 
+# create a list of dicts associated with row numbers on the sheet
 individual_row_dict = []
 for i in range(0,dict_size): # start at 0 to index at 0th element in list
     # print row name
-    print("\n\n{}".format(number_of_rows[i]))
+    # print("\n\n{}".format(number_of_rows[i]))
 
     # create a new dict for each row
     individual_row_dict.append(dict(sorted_data[i]))
 
     # print the dict
-    print("    {}\n".format(individual_row_dict[i]))
+    # print("    {}\n".format(individual_row_dict[i]))
 
 # print(number_of_rows)
+"""
+    For purposes of grabbing data from this portion of the code to use later 
+    in the code, here is what will be needed:
+    
+    name of dict: 
+        number_of_rows[i]
+        print("\n\n{}".format(number_of_rows[i]))
+    dict data:
+        individual_row_dict[i]
+        print("    {}\n".format(individual_row_dict[i]))
+"""
 
 
 ##############################################################################
@@ -142,32 +154,56 @@ def title_names_to_excel(input_names):
         # print(column_letter)
 title_names_to_excel(column_names)
 
-# finding the specific key-values that correlate with the columns in excel
-keys_to_search = [sorted_data[2].get("content"), # Task Name
-                    sorted_data[2]["entity"].get("code"), # Set Part Name
-                    sorted_data[2]["sg_parent_build"].get("code"), # Parent Build Name
-                    sorted_data[2].get("start_date"), # Start Date
-                    sorted_data[2].get("due_date") # End Date
-                ]
-print (keys_to_search)
-print("List of searchable keys: {}\n".format(keys_to_search))
 
+
+def remove_brackets(input):
+    return str(input).strip("[]")
 
 # FUNCTION to pass the sorted data from dict to excel
-def sorted_data_to_excel(input_data):
+def sorted_data_to_excel(input_data, row_number):
     column_index = 0 # setting counter iter for stringed loop
+    print("Testing sorted_data_to_ecel function\n")
+    
 
     for name in input_data:
-        # print(name)
-
-        column_index += 1
+        column_index += 1 
+        print("Row {} : {}\n".format(row_number, input_data[row_number]))
 
         column_letter = get_column_letter(column_index)
-        # column_index = column_index_from_string(name)
-    
-        ws.cell(row=1, column=column_index, value=name)
-        # print(column_letter)
-sorted_data_to_excel(column_names)
+        d = input_data[row_number]
+
+        # finding the specific key-values that correlate with the columns in excel
+        keys_to_search = [d.get("content"), # Task 
+                            d["entity"].get("code"), # Set Part
+                            d["sg_parent_build"].get("code"), # P. Build
+                            d.get("start_date"), # Start Date
+                            d.get("due_date") # End Date
+                        ]
+        print (keys_to_search)
+        print("List of searchable keys: {}\n".format(keys_to_search))
+
+        # cell_value = d.get("content") # Task Name
+
+        # ws['A2'] = data.get("content") # Task Name
+        # if column_letter == 'A':
+        #     cell_value = d.get("content") # Task Name
+        # if column_letter == 'B':
+        #     cell_value = remove_brackets(d["entity"].get("code")) # Part Name
+        # if column_letter == 'C':
+        #     cell_value = d["sg_parent_build"].get("code") # Parent Build Name
+        # if column_letter == 'D':
+        #     cell_value = d.get("start_date") # Start Date
+        # if column_letter == 'E':
+        #     cell_value = d.get("due_date") # End Date
+        # else:
+        #     print("There are no columns for this data.")
+        #     return False 
+
+        # access a cell at specified row column and set value
+        # ws.cell(row=row_number, column=column_index, value=cell_value) 
+    #     # print(column_letter)
+
+sorted_data_to_excel(individual_row_dict,2)
 ##############################################################################
 # 5. Format data
 
