@@ -182,91 +182,71 @@ def check_column_letter_set_data(letter):
     return value 
 # check_column_letter_set_data("k") # returns error as expected
 
+# FUNCTION to catch None
+def catch_key(input_dict, key_catch, nested_key):
+    if input_dict.get(key_catch) is not None:
+        if nested_key in input_dict.get(key_catch):
+            return input_dict[key_catch][nested_key]
+        else: 
+            return input_dict.get(key_catch)
+    else:
+        print("Very sneaky data!")
+        value = "Not available"
+        return input_dict.get(value)
+        # return None
+
 # FUNCTION to find specific key-values
 def find_specific_key_values(input_dict):
     # create a list
     matching_values =[]
     
     # add values from specific keys to list
-    matching_values.append(input_dict.get("content")) # Task Name
+    # Task Name
+    task_name = catch_key(input_dict, "content", None)
+    matching_values.append(task_name) 
     
+    # Set Part Name
     # remove brackets from data point
-    set_part = remove_brackets(input_dict["entity"].get("code")) # Set Part
-    matching_values.append(set_part) # Set Part Name
+    set_part = remove_brackets(catch_key(input_dict, "entity", "code")) 
+    matching_values.append(set_part) 
     
-    parent_build = remove_quote(input_dict["sg_parent_build"].get("code"))
-    matching_values.append(parent_build) # Parent Build
+    # Parent Build
+    p_build = catch_key(input_dict, "sg_parent_build", "code")
+    parent_build = remove_quote(p_build)
+    matching_values.append(parent_build) 
     
-    matching_values.append(input_dict.get("start_date")) # Start Date
-    matching_values.append(input_dict.get("due_date")) # End Date
+    # Start Date
+    start_date = catch_key(input_dict, "start_date", None)
+    matching_values.append(start_date) 
+    
+    # End Date
+    due_date = catch_key(input_dict, "due_date", None)
+    matching_values.append(due_date) 
     
     # print("values : {}\n".format(matching_values))
     return matching_values 
 
 # FUNCTION to pass the sorted data from dict to excel
 def sorted_data_to_rows(input_data, row_number):
-    print("Testing sorted_data_to_rows function\n")
+    # print("Testing sorted_data_to_rows function\n")
 
     # print dict on row
     # print("Row {} dict: {}\n".format(row_number, input_data[row_number]))
 
     columns =['A', 'B', 'C', 'D', 'E']
-    for i in range(0, 5):
-        cell_letter = columns[i]
-        cell_number = str(row_number)
+    # for i in range(0, 5):
+    key_value = find_specific_key_values(input_data[row_number])
+    for i, cell in enumerate(columns):
+        cell_pos = cell + str(row_number)
+        ws[cell_pos] = key_value[i]
+        print(cell_pos)
+   
 
-
-        cell = cell_letter + cell_number
-        print("Cell: {}".format(cell))
-
-        # print specific data from key-values on row
-        value = find_specific_key_values(input_data[row_number])
-        print("Specific Key-Values {}".format(value))
-        # place value into excel cell
-        ws[cell] = value[i]
-        print("Value to go in cell: {}".format(value))
-        # print("{}-{}  || {} - {} ".format(row_number, cell_letter, cell, value))
-        print("{} - {} \n\n\n".format(cell, value))
-sorted_data_to_rows(individual_row_dict,2)
-
-
-
-for i in range(2,(dict_size+2)):
+for i in range(0,(dict_size)):
     print("row:{}".format(i))
     # place all data into excel , start at row 2
-    # sorted_data_to_rows(individual_row_dict,i)
+    sorted_data_to_rows(individual_row_dict,(i+2))
 
-# FUNCTION to pass the sorted data from dict to excel
-def sorted_data_to_excel(input_data, starting_row):
-    # print("Testing sorted_data_to_ecel function\n")
-
-    # print dict on row
-    # print("Row {} : {}\n".format(starting_row, input_data[starting_row]))
-
-    columns =['A', 'B', 'C', 'D', 'E']
-    for j in range(0, dict_size): # all data 
-        for i in range(0, 5): # data per row
-            row_number = starting_row + j
-
-            cell_letter = columns[i]
-            cell_number = str(row_number)
-
-
-            cell = cell_letter + cell_number
-            # print("Cell: {}".format(cell))
-
-            # print specific data from key-values on row
-            value = find_specific_key_values(input_data[row_number])[i-1]
-            # print("Specific Key-Values {} \n".format(value))
-
-            # place value into excel cell
-            ws[cell] = value
-            # print("Value to go in cell: {} \n".format(x[i-1]))
-            # print("{}-{}  || {} - {} ".format(row_number, cell_letter, cell, value))
-            print("{} - {} ".format(cell, value))
-
-# place all data into excel , start at row 2
-# sorted_data_to_excel(individual_row_dict,2)
 ##############################################################################
 # 5. Format data
 
