@@ -70,6 +70,9 @@ data = pickle.load(unpickled_data)
 sorted_data = sorted(data, key=lambda  x: x['start_date'])
 # print(sorted_data) # [works]
 
+# get size of dict - may or may not be useful later
+dict_size = len(sorted_data)
+print("size of dict = {}\n".format(dict_size))
 
 ##############################################################################
 # 3. Create an excel file
@@ -94,10 +97,7 @@ corresponding_keys = ["content", "entity", "sg_parent_build", "start_date",
 # print (column_names)
 # print (corresponding_keys)
 
-##############################################################################
-# 5. Format data
-
-# Function to pass column headers from dict to excel 
+# FUNCTION to pass column headers from dict to excel 
 def title_names_to_excel(input_names):
     column_index = 0 # setting counter iter for stringed loop
 
@@ -111,9 +111,36 @@ def title_names_to_excel(input_names):
     
         ws.cell(row=1, column=column_index, value=name)
         # print(column_letter)
-
-
 title_names_to_excel(column_names)
+
+# finding the specific key-values that correlate with the columns in excel
+keys_to_search = [sorted_data.get("content"), # Task Name
+                    sorted_data["entity"].get("code"), # Set Part Name
+                    sorted_data["sg_parent_build"].get("code"), # Parent Build Name
+                    sorted_data.get("start_date"), # Start Date
+                    sorted_data.get("due_date")] # End Date
+print (keys_to_search)
+print("List of searchable keys: {}\n".format(keys_to_search))
+
+
+# FUNCTION to pass the sorted data from dict to excel
+def sorted_data_to_excel(input_data):
+    column_index = 0 # setting counter iter for stringed loop
+
+    for name in input_data:
+        # print(name)
+
+        column_index += 1
+
+        column_letter = get_column_letter(column_index)
+        # column_index = column_index_from_string(name)
+    
+        ws.cell(row=1, column=column_index, value=name)
+        # print(column_letter)
+sorted_data_to_excel(column_names)
+##############################################################################
+# 5. Format data
+
 ##############################################################################
 wb.save('converted_data.xlsx')
 print ("\nFinished") # only for testing purposes
