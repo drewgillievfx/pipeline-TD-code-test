@@ -80,10 +80,10 @@ number_of_rows = []
 # create name of rows based on the size of the sorted data
 for i in range(0,dict_size): # start at 2 because row number 2
     # name and row number
-    name_part = "data_row_number_"
+    name_part = "data_starting_row_"
     number_part = i + 2
 
-    # final name should look like "data_row_number_4"
+    # final name should look like "data_starting_row_4"
     list_of_dict_name = name_part + str(number_part)
 
     # add name to the number_of_rows list
@@ -157,6 +157,9 @@ title_names_to_excel(column_names)
 def remove_brackets(input):
     return str(input).strip("[]")
 
+def remove_quote(input):
+    return str(input).strip(" '' ")
+
 # FUNCTION to check the column and return category as value
 def check_column_letter_set_data(letter):
     try:
@@ -191,8 +194,8 @@ def find_specific_key_values(input_dict):
     set_part = remove_brackets(input_dict["entity"].get("code")) # Set Part
     matching_values.append(set_part) # Set Part Name
     
-    parent_build = input_dict["sg_parent_build"].get("code") # Parent Build
-    matching_values.append(parent_build) 
+    parent_build = remove_quote(input_dict["sg_parent_build"].get("code"))
+    matching_values.append(parent_build) # Parent Build
     
     matching_values.append(input_dict.get("start_date")) # Start Date
     matching_values.append(input_dict.get("due_date")) # End Date
@@ -201,34 +204,69 @@ def find_specific_key_values(input_dict):
     return matching_values 
 
 # FUNCTION to pass the sorted data from dict to excel
-def sorted_data_to_excel(input_data, row_number):
-    print("Testing sorted_data_to_ecel function\n")
+def sorted_data_to_rows(input_data, row_number):
+    print("Testing sorted_data_to_rows function\n")
 
     # print dict on row
-    print("Row {} : {}\n".format(row_number, input_data[row_number]))
-
-    # print specific data from key-values on row
-    x = find_specific_key_values(input_data[row_number])
-    print("Specific Key-Values {} \n".format(x))
+    # print("Row {} dict: {}\n".format(row_number, input_data[row_number]))
 
     columns =['A', 'B', 'C', 'D', 'E']
     for i in range(0, 5):
-
         cell_letter = columns[i]
         cell_number = str(row_number)
 
 
         cell = cell_letter + cell_number
-        print("Cell: {} \n".format(cell))
+        print("Cell: {}".format(cell))
 
+        # print specific data from key-values on row
+        value = find_specific_key_values(input_data[row_number])
+        print("Specific Key-Values {}".format(value))
         # place value into excel cell
-        ws[cell] = x[i-1]
-        print("Value to go in cell: {} \n".format(x[i-1]))
+        ws[cell] = value[i]
+        print("Value to go in cell: {}".format(value))
+        # print("{}-{}  || {} - {} ".format(row_number, cell_letter, cell, value))
+        print("{} - {} \n\n\n".format(cell, value))
+sorted_data_to_rows(individual_row_dict,2)
 
 
 
-for i in range(0, dict_size):
-    sorted_data_to_excel(individual_row_dict,i+2)
+for i in range(2,(dict_size+2)):
+    print("row:{}".format(i))
+    # place all data into excel , start at row 2
+    # sorted_data_to_rows(individual_row_dict,i)
+
+# FUNCTION to pass the sorted data from dict to excel
+def sorted_data_to_excel(input_data, starting_row):
+    # print("Testing sorted_data_to_ecel function\n")
+
+    # print dict on row
+    # print("Row {} : {}\n".format(starting_row, input_data[starting_row]))
+
+    columns =['A', 'B', 'C', 'D', 'E']
+    for j in range(0, dict_size): # all data 
+        for i in range(0, 5): # data per row
+            row_number = starting_row + j
+
+            cell_letter = columns[i]
+            cell_number = str(row_number)
+
+
+            cell = cell_letter + cell_number
+            # print("Cell: {}".format(cell))
+
+            # print specific data from key-values on row
+            value = find_specific_key_values(input_data[row_number])[i-1]
+            # print("Specific Key-Values {} \n".format(value))
+
+            # place value into excel cell
+            ws[cell] = value
+            # print("Value to go in cell: {} \n".format(x[i-1]))
+            # print("{}-{}  || {} - {} ".format(row_number, cell_letter, cell, value))
+            print("{} - {} ".format(cell, value))
+
+# place all data into excel , start at row 2
+# sorted_data_to_excel(individual_row_dict,2)
 ##############################################################################
 # 5. Format data
 
