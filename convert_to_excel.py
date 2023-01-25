@@ -63,7 +63,7 @@ data = pickle.load(unpickled_data)
 
 ##############################################################################
 # 2. Sort data by earliest start date
-sorted_data = sorted(data, key=lambda  x: x['Start Date'])
+sorted_data = sorted(data, key=lambda  x: x['start_date'])
 
 
 ##############################################################################
