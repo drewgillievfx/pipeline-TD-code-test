@@ -185,8 +185,11 @@ def check_column_letter_set_data(letter):
 # FUNCTION to catch None
 def catch_key(input_dict, key_catch, nested_key):
     if input_dict.get(key_catch) is not None:
-        if nested_key in input_dict.get(key_catch):
-            return input_dict[key_catch][nested_key]
+        if nested_key is not None:
+            if nested_key in input_dict.get(key_catch):
+                return input_dict[key_catch][nested_key]
+            else: 
+                return None
         else: 
             return input_dict.get(key_catch)
     else:
@@ -227,25 +230,44 @@ def find_specific_key_values(input_dict):
     return matching_values 
 
 # FUNCTION to pass the sorted data from dict to excel
-def sorted_data_to_rows(input_data, row_number):
-    # print("Testing sorted_data_to_rows function\n")
+def sorted_data_to_rows(input_data):
+    print("Testing sorted_data_to_rows function\n")
 
-    # print dict on row
-    # print("Row {} dict: {}\n".format(row_number, input_data[row_number]))
+    # print dict 
+    print("dict: {}\n".format(input_data))
 
     columns =['A', 'B', 'C', 'D', 'E']
     # for i in range(0, 5):
-    key_value = find_specific_key_values(input_data[row_number])
-    for i, cell in enumerate(columns):
-        cell_pos = cell + str(row_number)
-        ws[cell_pos] = key_value[i]
-        print(cell_pos)
-   
+    for j, value in enumerate(columns):
+        for i, value in enumerate(columns):
+            print(f'Column: {i + 1}, Value: {value}')
+            ws.cell((j+1), (i+1), value)
 
-for i in range(0,(dict_size)):
-    print("row:{}".format(i))
-    # place all data into excel , start at row 2
-    sorted_data_to_rows(individual_row_dict,(i+2))
+    
+    # if row_number < len(input_data):
+            # key_value = find_specific_key_values(input_data[row_number])
+    # else:
+        # print("Index out of range.")
+        # row_number = row_number + 1
+        # key_value = find_specific_key_values(input_data[row_number])
+
+
+    # for i, row in enumerate(input_data):
+    #     key_value = find_specific_key_values(row)
+    #     for j, cell in enumerate(columns):
+    #         cell_pos = cell + str(row_number + i)
+    #         ws[cell_pos] = key_value[j]
+    #         print(cell_pos)
+    
+    # ws.cell(2, 2, key_value[1])
+   
+sorted_data_to_rows(individual_row_dict)
+
+# for i in range(2,(dict_size + 2)):
+#     print("row:{}".format(i))
+#     # place all data into excel , start at row 2
+#     current_row = i
+#     sorted_data_to_rows(individual_row_dict,current_row)
 
 ##############################################################################
 # 5. Format data
