@@ -55,8 +55,8 @@ class BasicDialog(QtWidgets.QDialog):
         return {
                 "Name:": self.name_edit.text(),
                 "Type:": self.combo_box.currentText(),
-                "Need By:": self.need_date.toPyDate(),
-                "Notes:": self.text_editto.PlainText(),
+                "Need By:": self.need_date.date().toPyDate(),
+                "Notes:": self.text_edit.toPlainText(),
         }
         # return None
 
