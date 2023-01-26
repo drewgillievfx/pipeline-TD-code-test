@@ -31,7 +31,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-
+ 
 # Comments on solving this
 """
     1. Folding the functions we have a simple code structure
@@ -56,4 +56,11 @@ if __name__ == '__main__':
         this probably was not the problem
         but cPickle does not work in Python3
         changed to pickle
+    6. Current errors
+        line 33, in <module> main()
+        line 27, in main item_string = getItemString(item)
+        line 10, in getItemString item_string += 'Task Name: %s\n' % task_name
+        UnboundLocalError: local variable 'task_name' referenced before assignment
+
+
 """
