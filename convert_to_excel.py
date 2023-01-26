@@ -56,94 +56,55 @@ from openpyxl.utils import get_column_letter
 print ("Start\n") # only for testing purposes
 
 ##############################################################################
-# 1. Unpickle file and place into a dict
-
+# Variables, lists, etc
+column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
+corresponding_keys = ["content", "entity", "sg_parent_build", "start_date", 
+                    "due_date"]
+                    
 imported_data = "test_data.pkl"
+workbook_title = "converted_data.xlsx"
+worksheet_title = "Formatted"
 
+
+##############################################################################
+# 1. Unpickle file and place into a list
+
+# convert pickled data into a list
 unpickled_data = open(imported_data, "rb")
 data = pickle.load(unpickled_data)
-print(data) # [works] this is a list, not a dict
-t = type(data)
-print("type = {}\n".format(t))
+# print(data) # [works] this is a list, not a dict
 
-sorted_data = sorted(data, key=lambda  x: x['start_date'])
-
-# find size - how many dicts are inside this dictionary 
-list_size = len(data)
-print("size of list = {}\n".format(list_size))
+# check type
+# t = type(data)
+# print("type = {}\n".format(t))
 
 ##############################################################################
 # 2. Sort data by earliest start date
-# sorted = data.sort()
-# sorted_data = sorted(data, key=lambda  x: x['start_date'])
+
+# find size - how many lists are inside this list 
+list_size = len(data)
+print("size of list = {}\n".format(list_size))
+
+sorted_data = sorted(data, key=lambda  x: x['start_date'])
 # print(sorted_data) # [works]
-
-def remove_brackets(input):
-    return str(input).strip("[]")
-
-def remove_quote(input):
-    return str(input).strip(" '' ")
-
-def get_data_from_lists(input_data):
-    column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
-    for i in range(0,len(input_data)):
-        inner_data = input_data[i]
-
-        print("Sublist: {}".format(i))
-
-
-        content = inner_data['content']
-        print("{} = {}".format(column_names[0], content))
-
-        entity_code = inner_data['entity']['code']
-        code_no_bracket = remove_brackets(entity_code)
-        code_no_quote = remove_quote(code_no_bracket)
-        print("{} = {}".format(column_names[1], code_no_quote))
-
-        sg_parent_build_code = inner_data['sg_parent_build']['code']
-        sg_parent = remove_brackets(sg_parent_build_code)
-        print("{} = {}".format(column_names[2], sg_parent))
-
-        start_date = inner_data['start_date']
-        print("{} = {}".format(column_names[3], start_date))
-
-        due_date = inner_data['due_date']
-        print("{} = {}\n".format(column_names[4], due_date))
-
-        print("=====================\n")
-
-get_data_from_lists(sorted_data)
-
-
-# print(data["due_date"])
-
-# # find size - how many dicts are inside this dictionary 
-# def nested_dict_size(d):
-#     size = 0
-#     for key, value in d.items():
-#         if isinstance(value, dict):
-#             size += nested_dict_size(value)
-#         else:
-#             size += 1
-#     return size
-
-# big_dict_size = nested_dict_size(sorted_data)
-# print("big dict size = {}\n".format(big_dict_size))
-
 
 ##############################################################################
 # 3. Create an excel file
 
 wb = Workbook()
 ws = wb.active # add worksheet
-ws.title = "Formatted" # change title
+ws.title = worksheet_title # change title
 
 ##############################################################################
 # 4. Add data to excel file
 
+def remove_brackets(input):
+    return str(input).strip("[]")
+
+def remove_quote(input):
+    return str(input).strip(" '' ")
 # Add the column headers and corresponding keys
-corresponding_keys = ["content", "entity", "sg_parent_build", "start_date", 
-                    "due_date"]
+
 # print (column_names)
 # print (corresponding_keys)
 
@@ -264,9 +225,40 @@ def sorted_data_to_rows(input_data):
    
 # sorted_data_to_rows(sorted_data)
 
+def get_data_from_lists(input_data):
+    for i in range(0,list_size):
+        inner_data = input_data[i]
+
+        print("Sublist: {}".format(i))
+
+
+        content = inner_data['content']
+        print("{} = {}".format(column_names[0], content))
+
+        entity_code = inner_data['entity']['code']
+        code_no_bracket = remove_brackets(entity_code)
+        code_no_quote = remove_quote(code_no_bracket)
+        print("{} = {}".format(column_names[1], code_no_quote))
+
+        sg_parent_build_code = inner_data['sg_parent_build']['code']
+        sg_parent = remove_brackets(sg_parent_build_code)
+        print("{} = {}".format(column_names[2], sg_parent))
+
+        start_date = inner_data['start_date']
+        print("{} = {}".format(column_names[3], start_date))
+
+        due_date = inner_data['due_date']
+        print("{} = {}\n".format(column_names[4], due_date))
+
+        print("=====================\n")
+
+get_data_from_lists(sorted_data)
+
+
+
 ##############################################################################
 # 5. Format data
 
 ##############################################################################
-wb.save('converted_data.xlsx')
+wb.save(workbook_title)
 print ("\nFinished") # only for testing purposes
