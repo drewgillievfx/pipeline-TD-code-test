@@ -53,10 +53,10 @@ class BasicDialog(QtWidgets.QDialog):
 
     def getValues(self):
         return {
-                "Name:": self.name_edit,
-                "Type:": self.combo_box,
-                "Need By:": self.need_date,
-                "Notes:": self.text_edit,
+                "Name:": self.name_edit(),
+                "Type:": self.combo_box(),
+                "Need By:": self.need_date(),
+                "Notes:": self.text_edit(),
         }
         # return None
 
