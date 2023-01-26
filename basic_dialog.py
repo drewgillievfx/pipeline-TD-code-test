@@ -35,7 +35,7 @@ class BasicDialog(QtWidgets.QDialog):
         main_layout.addWidget(self.combo_box) 
 
         # Add QDateWidget : Need By
-        self.need_date = QtWidgets.QDateWidget()
+        self.need_date = QtWidgets.QDateEdit()
         self.need_date.setDate(datetime.datetime.now().date() +
                                 datetime.timedelta(days=7))
         self.need_date.setMinimumDate(datetime.datetime.now().date())
@@ -46,7 +46,7 @@ class BasicDialog(QtWidgets.QDialog):
 
         # Add QTextEdit : Notes
         self.text_edit = QtWidgets.QTextEdit()
-        self.text_edit.setPlaceHolderText("Write any notes here...")
+        self.text_edit.setPlaceholderText("Write any notes here...")
         self.text_edit.setObjectName("Notes")
         main_layout.addWidget(QtWidgets.QLabel("Notes"))
         main_layout.addWidget(self.text_edit)
