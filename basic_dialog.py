@@ -22,10 +22,10 @@ class BasicDialog(QtWidgets.QDialog):
         main_layout.addWidget(button_box)
 
         # Add QLineEdit : Name
-        self.line_edit = QtWidgets.QLineEdit()
-        self.line_edit.setObjectName("Name")
+        self.name_edit = QtWidgets.QLineEdit()
+        self.name_edit.setObjectName("Name")
         main_layout.addWidget(QtWidgets.QLabel("Name"))
-        main_layout.addWidget(self.line_edit)
+        main_layout.addWidget(self.name_edit)
 
         # Add QComboBox : A B C
         self.combo_box = QtWidgets.QComboBox()
@@ -52,7 +52,13 @@ class BasicDialog(QtWidgets.QDialog):
         main_layout.addWidget(self.text_edit)
 
     def getValues(self):
-        return None
+        return {
+                "Name:": self.name_edit,
+                "Type:": self.combo_box,
+                "Need By:": self.need_date,
+                "Notes:": self.text_edit,
+        }
+        # return None
 
 if __name__ == '__main__':
     # Instantiate a QApplication - requirement for Qt
