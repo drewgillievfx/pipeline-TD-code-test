@@ -75,7 +75,7 @@ dict_size = len(sorted_data)
 # print("size of dict = {}\n".format(dict_size))
 
 # create a list of names to denote the different rows from the sorted data
-number_of_rows = []
+number_of_rows = {}
 
 # create name of rows based on the size of the sorted data
 for i in range(0,dict_size): # start at 2 because row number 2
@@ -90,7 +90,7 @@ for i in range(0,dict_size): # start at 2 because row number 2
     number_of_rows.append(list_of_dict_name)
 
 # create a list of dicts associated with row numbers on the sheet
-individual_row_dict = []
+individual_row_dict = {}
 for i in range(0,dict_size): # start at 0 to index at 0th element in list
     # print row name
     # print("\n\n{}".format(number_of_rows[i]))
@@ -231,17 +231,36 @@ def find_specific_key_values(input_dict):
 
 # FUNCTION to pass the sorted data from dict to excel
 def sorted_data_to_rows(input_data):
-    print("Testing sorted_data_to_rows function\n")
+    # print("Testing sorted_data_to_rows function\n")
 
     # print dict 
-    print("dict: {}\n".format(input_data))
-
+    # print("dict: {}\n".format(input_data))
+    """
+        Note: if the data changes then this need to be updated. 
+        Possibly a different function to handle the sections needed. 
+    """
     columns =['A', 'B', 'C', 'D', 'E']
-    # for i in range(0, 5):
-    for j, value in enumerate(columns):
-        for i, value in enumerate(columns):
-            print(f'Column: {i + 1}, Value: {value}')
-            ws.cell((j+1), (i+1), value)
+    rows =['1', '2', '3', '4', '5']
+    key_value = find_specific_key_values(input_data)
+
+    # columns = i rows = j
+    # for j in range(2, (dict_size + 2)):
+    # for i, row in enumerate(rows):
+    for i, row in enumerate(range(2, (dict_size+2))):
+        for j, col in enumerate(columns):
+            # key_value = find_specific_key_values(input_data[i])
+            # key_i = find_specific_key_values(input_data[i])
+            # key_j = find_specific_key_values(input_data[j])
+            # print(f'key i: {key_i}, key j: {key_j}')
+
+            print(f'Rows: {row}, Value: {col}')
+
+            starting_row = 2
+            cell_value = col
+            # ws.cell((starting_row+i), (j+1), cell_value)
+            ws[col + str(row)] = key_value[i][j]
+            # ws[columns[i] + str(j)] = key_value[i]
+
 
     
     # if row_number < len(input_data):
@@ -261,7 +280,8 @@ def sorted_data_to_rows(input_data):
     
     # ws.cell(2, 2, key_value[1])
    
-sorted_data_to_rows(individual_row_dict)
+# sorted_data_to_rows(individual_row_dict)
+sorted_data_to_rows(sorted_data)
 
 # for i in range(2,(dict_size + 2)):
 #     print("row:{}".format(i))
