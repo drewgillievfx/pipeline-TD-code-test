@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets
 # from PyQt5 import QtCore
 import datetime
 
+
 class BasicDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(BasicDialog, self).__init__(parent=parent)
@@ -15,7 +16,7 @@ class BasicDialog(QtWidgets.QDialog):
         # Add ok and cancel buttons
         # And hook them up to dialogs accept/reject methods
         button_box = QtWidgets.QDialogButtonBox(
-                                            QtWidgets.QDialogButtonBox.Ok|\
+                                            QtWidgets.QDialogButtonBox.Ok |
                                             QtWidgets.QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
@@ -32,12 +33,12 @@ class BasicDialog(QtWidgets.QDialog):
         self.combo_box.addItems(["A", "B", "C"])
         self.combo_box.setObjectName("Type")
         main_layout.addWidget(QtWidgets.QLabel("Type"))
-        main_layout.addWidget(self.combo_box) 
+        main_layout.addWidget(self.combo_box)
 
         # Add QDateWidget : Need By
         self.need_date = QtWidgets.QDateEdit()
         self.need_date.setDate(datetime.datetime.now().date() +
-                                datetime.timedelta(days=7))
+                               datetime.timedelta(days=7))
         self.need_date.setMinimumDate(datetime.datetime.now().date())
         self.need_date.setCalendarPopup(True)
         self.need_date.setObjectName("Need By:")
@@ -58,8 +59,8 @@ class BasicDialog(QtWidgets.QDialog):
                 "Need By:": self.need_date.date().toPyDate(),
                 "Notes:": self.text_edit.toPlainText(),
         }
-        # return None
- 
+
+
 if __name__ == '__main__':
     # Instantiate a QApplication - requirement for Qt
     app = QtWidgets.QApplication([])
