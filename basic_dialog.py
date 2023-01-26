@@ -59,7 +59,7 @@ class BasicDialog(QtWidgets.QDialog):
                 "Notes:": self.text_edit.toPlainText(),
         }
         # return None
-
+ 
 if __name__ == '__main__':
     # Instantiate a QApplication - requirement for Qt
     app = QtWidgets.QApplication([])
