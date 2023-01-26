@@ -6,6 +6,9 @@ def getItemString(item):
         task_name = "Design/Concept"
     elif item['content'] == 'first build':
         task_name = "First Build"
+    else:
+        task_name =  'Not available'
+
     item_string = 'Task Date Change\n'
     item_string += 'Task Name: %s\n' % task_name
     item_string += 'Link: %s\n' % item['entity']['code'][0]
@@ -16,6 +19,7 @@ def getItemString(item):
          'Not available'
     item_string += 'Start: %s\n' % item['start_date']
     item_string += 'End: %s\n' % item['due_date']
+
     return item_string
 
 def main():
@@ -60,7 +64,22 @@ if __name__ == '__main__':
         line 33, in <module> main()
         line 27, in main item_string = getItemString(item)
         line 10, in getItemString item_string += 'Task Name: %s\n' % task_name
-        UnboundLocalError: local variable 'task_name' referenced before assignment
+        UnboundLocalError: local variable 'task_name' referenced before 
+        assignment
+    7. There we go!
+        There was an issue with the if elIF part of the code
+        Almost didnt catch this
+        What happens is that 
+            if:
+                A
+            elif:
+                if not A, then B
+            
+            but if it is niether, then task_name does not get created
+            so adding an 
+            else:
+                if not A, or B, 
+                then default to this value
 
 
 """
