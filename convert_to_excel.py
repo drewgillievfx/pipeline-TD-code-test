@@ -68,51 +68,11 @@ data = pickle.load(unpickled_data)
 # 2. Sort data by earliest start date
 
 sorted_data = sorted(data, key=lambda  x: x['start_date'])
-# print(sorted_data) # [works]
+print(sorted_data) # [works]
 
 # get size of dict - may or may not be useful later
 dict_size = len(sorted_data)
 # print("size of dict = {}\n".format(dict_size))
-
-# create a list of names to denote the different rows from the sorted data
-number_of_rows = {}
-
-# create name of rows based on the size of the sorted data
-for i in range(0,dict_size): # start at 2 because row number 2
-    # name and row number
-    name_part = "data_starting_row_"
-    number_part = i + 2
-
-    # final name should look like "data_starting_row_4"
-    list_of_dict_name = name_part + str(number_part)
-
-    # add name to the number_of_rows list
-    number_of_rows.append(list_of_dict_name)
-
-# create a list of dicts associated with row numbers on the sheet
-individual_row_dict = {}
-for i in range(0,dict_size): # start at 0 to index at 0th element in list
-    # print row name
-    # print("\n\n{}".format(number_of_rows[i]))
-
-    # create a new dict for each row
-    individual_row_dict.append(dict(sorted_data[i]))
-
-    # print the dict
-    # print("    {}\n".format(individual_row_dict[i]))
-
-# print(number_of_rows)
-"""
-    For purposes of grabbing data from this portion of the code to use later 
-    in the code, here is what will be needed:
-    
-    name of dict: 
-        number_of_rows[i]
-        print("\n\n{}".format(number_of_rows[i]))
-    dict data:
-        individual_row_dict[i]
-        print("    {}\n".format(individual_row_dict[i]))
-"""
 
 
 ##############################################################################
@@ -248,10 +208,6 @@ def sorted_data_to_rows(input_data):
     # for i, row in enumerate(rows):
     for i, row in enumerate(range(2, (dict_size+2))):
         for j, col in enumerate(columns):
-            # key_value = find_specific_key_values(input_data[i])
-            # key_i = find_specific_key_values(input_data[i])
-            # key_j = find_specific_key_values(input_data[j])
-            # print(f'key i: {key_i}, key j: {key_j}')
 
             print(f'Rows: {row}, Value: {col}')
 
@@ -261,33 +217,8 @@ def sorted_data_to_rows(input_data):
             ws[col + str(row)] = key_value[i][j]
             # ws[columns[i] + str(j)] = key_value[i]
 
-
-    
-    # if row_number < len(input_data):
-            # key_value = find_specific_key_values(input_data[row_number])
-    # else:
-        # print("Index out of range.")
-        # row_number = row_number + 1
-        # key_value = find_specific_key_values(input_data[row_number])
-
-
-    # for i, row in enumerate(input_data):
-    #     key_value = find_specific_key_values(row)
-    #     for j, cell in enumerate(columns):
-    #         cell_pos = cell + str(row_number + i)
-    #         ws[cell_pos] = key_value[j]
-    #         print(cell_pos)
-    
-    # ws.cell(2, 2, key_value[1])
    
-# sorted_data_to_rows(individual_row_dict)
-sorted_data_to_rows(sorted_data)
-
-# for i in range(2,(dict_size + 2)):
-#     print("row:{}".format(i))
-#     # place all data into excel , start at row 2
-#     current_row = i
-#     sorted_data_to_rows(individual_row_dict,current_row)
+# sorted_data_to_rows(sorted_data)
 
 ##############################################################################
 # 5. Format data
