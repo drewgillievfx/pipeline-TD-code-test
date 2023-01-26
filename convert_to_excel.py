@@ -120,7 +120,6 @@ def title_names_to_excel(input_names):
         # print(column_letter)
 title_names_to_excel(column_names)
 
-
 # FUNCTION to check the column and return category as value
 def check_column_letter_set_data(letter):
     try:
@@ -142,24 +141,6 @@ def check_column_letter_set_data(letter):
     print(value)
     return value 
 # check_column_letter_set_data("k") # returns error as expected
-
-# # FUNCTION to catch None
-# def catch_key(input_list, key_catch, nested_key):
-#     # if input_list.get(key_catch) is not None:
-#     #     if nested_key is not None:
-#     #         if nested_key in input_list.get(key_catch):
-#     #             return input_list[key_catch][nested_key]
-#     #         else: 
-#     #             return None
-#     #     else: 
-#     #         return input_list.get(key_catch)
-#     if input_list[key_catch][nested_key] is None:
-#         print("Very sneaky data!")
-#         value = "Not available"
-#         return value
-#     else:
-#         return key_catch
-#         # return None
 
 # FUNCTION to find specific key-values
 def find_specific_key_values(input_dict):
@@ -248,8 +229,6 @@ def catch_key(catch_list):
         else:
             return "Not available"
 
-
-
 # FUNCTION to find specific key-values
 def get_data_from_lists(input_data):
     for i in range(0,list_size):
@@ -263,6 +242,7 @@ def get_data_from_lists(input_data):
         if content == "Not Available":
             continue
         print("{} = {}".format(column_names[0], content))
+        ws.cell(row = i + 2, column=1).value = content
 
         # SET PART
         set_part_list = [inner_data, 'entity', 'code']
@@ -270,13 +250,11 @@ def get_data_from_lists(input_data):
         if entity_code == "Not Available":
             continue
         
-        # if inner_data['entity']['code'] is not None:
-            # entity_code = inner_data['entity']['code']
         code_no_bracket = remove_brackets(entity_code)
         code_no_quote = remove_quote(code_no_bracket)
         print("{} = {}".format(column_names[1], code_no_quote))
-        # else:
-            # print("entity code value is None")
+        ws.cell(row = i + 2, column=2).value = code_no_quote
+
 
         # PARENT BUILD 
         parent_list = [inner_data, 'sg_parent_build', 'code']
@@ -285,12 +263,9 @@ def get_data_from_lists(input_data):
             sg_parent_build_code = "Not Available"
             continue
 
-        # sg_parent_build_code = inner_data['sg_parent_build']['code']
         sg_parent = remove_brackets(sg_parent_build_code)
         print("{} = {}".format(column_names[2], sg_parent))
-        # else:
-            # print("sg_parent_build code value is None")
-
+        ws.cell(row = i + 2, column=3).value = sg_parent
         
         # START DATE
         start_list = [inner_data, 'start_date']
@@ -298,11 +273,8 @@ def get_data_from_lists(input_data):
         if start_date == "Not Available":
             continue
 
-        # if inner_data['start_date'] is not None:
-        #     start_date = inner_data['start_date']
         print("{} = {}".format(column_names[3], start_date))
-        # else:
-            # print("start_date value is None")
+        ws.cell(row = i + 2, column=4).value = start_date
 
         # END DATE 
         end_list = [inner_data, 'due_date']
@@ -310,13 +282,10 @@ def get_data_from_lists(input_data):
         if due_date == "Not Available":
             continue
 
-        # if inner_data['due_date'] is not None:
-            # due_date = inner_data['due_date']
         print("{} = {}\n".format(column_names[4], due_date))
-        # else:
-            # print("due_date value is None")
+        ws.cell(row = i + 2, column=5).value = due_date
 
-        print("=====================\n")
+        print("=====================\n") # visual element for debugging
 
 get_data_from_lists(sorted_data)
 
