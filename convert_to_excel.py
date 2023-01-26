@@ -52,6 +52,10 @@ import pickle
 from openpyxl import Workbook
 from openpyxl.utils import column_index_from_string
 from openpyxl.utils import get_column_letter
+from datetime import datetime
+from openpyxl.styles import Font
+from openpyxl.styles import Alignment
+from openpyxl.styles import PatternFill
 
 print ("Start\n") # only for testing purposes
 
@@ -293,6 +297,127 @@ get_data_from_lists(sorted_data)
 
 ##############################################################################
 # 5. Format data
+
+# if date has passed, shade entire row red
+# select row - fill it with red
+def fill_row(selected_row):
+    # select row
+    row_cells = ws[selected_row]
+
+    # select color red
+    fill_color = PatternFill(start_color="FFC7CE", 
+                            end_color="FFC7CE", fill_type = "solid")
+    font_change = Font(name='Arial', size=12, color='8B0000')
+
+    # set the fill color of the cells in the row
+    for cell in row_cells:
+        cell.fill = fill_color
+        cell.font = font_change
+
+# check date
+def date_to_check_from_excel():
+    for dates in range(2,(list_size+2)):
+        # get date from excel
+        date_to_get_checked = ws.cell(row =dates, column=5).value
+        
+        listed_date = datetime.strptime(date_to_get_checked, "%Y-%m-%d")
+
+        # get current date
+        current_date = datetime.now()
+        # print(current_date)
+        # print(listed_date)
+        if listed_date < current_date:
+            # print("This date has already passed.")
+            fill_row(dates)
+        else:
+            continue
+            # print("This date has not yet passed.")
+
+date_to_check_from_excel()
+
+
+# format title / header info
+def format_title():
+    # Set the Title font
+    title_font = Font(name='Arial', size=20, color='ffffff')
+
+    # Set Title fill
+    title_fill = PatternFill(start_color='000000', end_color='000000', fill_type='solid')
+
+    # Iterate through column_names
+    for i, title in enumerate(column_names):
+        # Get the column letter
+        column_letter = get_column_letter(i + 1)
+        column_number = column_letter + '1'
+
+        # Apply the formatting
+        # ws[column_number].alignment = title_alignment
+        ws[column_number].font = title_font
+        ws[column_number].fill = title_fill
+
+format_title()
+
+# center align data
+def center_align_cells(worksheet):
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.alignment = Alignment(horizontal='center')
+center_align_cells(ws)
+
+# right align data for column A
+def right_align_column_a():
+    for row in ws.iter_rows(min_row=1, max_col=1):
+        for cell in row:
+            if cell.row != 1:
+                cell.alignment = Alignment(horizontal='right', vertical='center')
+right_align_column_a()
+
+# size each column based on max cell length
+def autofit_columns(column_number):
+    # Initialize max_size
+    max_size = 0
+
+    # Iterate through cells in the column
+    for cell in ws[column_number]:
+        # Get the length of the cell value and font size
+        length = len(str(cell.value))
+        font_size = cell.font.size
+
+        # Update max_size if the current length + font size is greater than max_size
+        max_size = max(max_size, length + font_size)
+
+    average_size = 15
+    new_column_size = ((average_size + max_size) / 2) - 2
+    ws.column_dimensions[column_number].width = new_column_size
+
+    print(max_size)
+
+columns = ["A", "B", "C", "D", "E"]
+for column in columns:
+    autofit_columns(column)
+
+# check unavailable data
+def check_unavailable_data():
+    # for info in range(2,(list_size+2)):
+        # get date from excel
+        # not_available_check = ws.cell(row =info, column=info).value
+        
+    font_change = Font(name='Arial', size=12, color='8B0000', 
+                        bold=True, italic=True)
+
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value == "Not available":
+                # Apply the formatting
+                cell.font = font_change
+
+
+check_unavailable_data()
+
+
+
+
+
 
 ##############################################################################
 wb.save(workbook_title)
