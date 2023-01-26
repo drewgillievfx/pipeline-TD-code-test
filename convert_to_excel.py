@@ -62,18 +62,58 @@ imported_data = "test_data.pkl"
 
 unpickled_data = open(imported_data, "rb")
 data = pickle.load(unpickled_data)
-print(data) # [works]
-a = type(data)
-print(a)
+print(data) # [works] this is a list, not a dict
+t = type(data)
+print("type = {}\n".format(t))
+
+sorted_data = sorted(data, key=lambda  x: x['start_date'])
+
+# find size - how many dicts are inside this dictionary 
+list_size = len(data)
+print("size of list = {}\n".format(list_size))
+
 ##############################################################################
 # 2. Sort data by earliest start date
-
+# sorted = data.sort()
 # sorted_data = sorted(data, key=lambda  x: x['start_date'])
 # print(sorted_data) # [works]
 
-# find size - how many dicts are inside this dictionary 
-# dict_size = len(sorted_data)
-# print("size of dict = {}\n".format(dict_size))
+def remove_brackets(input):
+    return str(input).strip("[]")
+
+def remove_quote(input):
+    return str(input).strip(" '' ")
+
+def get_data_from_lists(input_data):
+    column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
+    for i in range(0,len(input_data)):
+        inner_data = input_data[i]
+
+        print("Sublist: {}".format(i))
+
+
+        content = inner_data['content']
+        print("{} = {}".format(column_names[0], content))
+
+        entity_code = inner_data['entity']['code']
+        code_no_bracket = remove_brackets(entity_code)
+        code_no_quote = remove_quote(code_no_bracket)
+        print("{} = {}".format(column_names[1], code_no_quote))
+
+        sg_parent_build_code = inner_data['sg_parent_build']['code']
+        sg_parent = remove_brackets(sg_parent_build_code)
+        print("{} = {}".format(column_names[2], sg_parent))
+
+        start_date = inner_data['start_date']
+        print("{} = {}".format(column_names[3], start_date))
+
+        due_date = inner_data['due_date']
+        print("{} = {}\n".format(column_names[4], due_date))
+
+        print("=====================\n")
+
+get_data_from_lists(sorted_data)
+
 
 # print(data["due_date"])
 
@@ -102,7 +142,6 @@ ws.title = "Formatted" # change title
 # 4. Add data to excel file
 
 # Add the column headers and corresponding keys
-column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
 corresponding_keys = ["content", "entity", "sg_parent_build", "start_date", 
                     "due_date"]
 # print (column_names)
@@ -124,11 +163,6 @@ def title_names_to_excel(input_names):
         # print(column_letter)
 title_names_to_excel(column_names)
 
-def remove_brackets(input):
-    return str(input).strip("[]")
-
-def remove_quote(input):
-    return str(input).strip(" '' ")
 
 # FUNCTION to check the column and return category as value
 def check_column_letter_set_data(letter):
