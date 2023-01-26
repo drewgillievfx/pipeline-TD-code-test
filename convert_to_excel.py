@@ -62,31 +62,41 @@ imported_data = "test_data.pkl"
 
 unpickled_data = open(imported_data, "rb")
 data = pickle.load(unpickled_data)
-# print(data) # [works]
-
+print(data) # [works]
+a = type(data)
+print(a)
 ##############################################################################
 # 2. Sort data by earliest start date
 
-sorted_data = sorted(data, key=lambda  x: x['start_date'])
-print(sorted_data) # [works]
+# sorted_data = sorted(data, key=lambda  x: x['start_date'])
+# print(sorted_data) # [works]
 
-# get size of dict - may or may not be useful later
-dict_size = len(sorted_data)
+# find size - how many dicts are inside this dictionary 
+# dict_size = len(sorted_data)
 # print("size of dict = {}\n".format(dict_size))
+
+# print(data["due_date"])
+
+# # find size - how many dicts are inside this dictionary 
+# def nested_dict_size(d):
+#     size = 0
+#     for key, value in d.items():
+#         if isinstance(value, dict):
+#             size += nested_dict_size(value)
+#         else:
+#             size += 1
+#     return size
+
+# big_dict_size = nested_dict_size(sorted_data)
+# print("big dict size = {}\n".format(big_dict_size))
 
 
 ##############################################################################
 # 3. Create an excel file
 
 wb = Workbook()
-
-# add worksheet
-ws = wb.active 
-
-# change title
-ws.title = "Formatted"
-
-# I may want to do a check to see if file exists ###
+ws = wb.active # add worksheet
+ws.title = "Formatted" # change title
 
 ##############################################################################
 # 4. Add data to excel file
