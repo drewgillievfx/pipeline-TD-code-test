@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from PyQt4 import QtGui
+from PyQt6 import QtGui
 
 class BasicDialog(QtGui.QDialog):
     def __init__(self, parent=None):
