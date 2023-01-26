@@ -16,7 +16,8 @@ def getItemString(item):
     if item['sg_parent_build']:
         item_string += 'Parent Build: %s\n' % item['sg_parent_build']['code']
     else:
-         'Not available'
+        'Not available'
+
     item_string += 'Start: %s\n' % item['start_date']
     item_string += 'End: %s\n' % item['due_date']
 
@@ -27,6 +28,7 @@ def main():
         data = pickle.load(f)
 
     email_body = ''
+
     for item in data:
         item_string = getItemString(item)
         email_body += '%s\n' % item_string
