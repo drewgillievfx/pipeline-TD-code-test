@@ -60,7 +60,7 @@ print ("Start\n") # only for testing purposes
 column_names = ["Task", "Set Part", "Parent Build", "Start Date", "End Date"]
 corresponding_keys = ["content", "entity", "sg_parent_build", "start_date", 
                     "due_date"]
-                    
+
 imported_data = "test_data.pkl"
 workbook_title = "converted_data.xlsx"
 worksheet_title = "Formatted"
@@ -98,23 +98,19 @@ ws.title = worksheet_title # change title
 ##############################################################################
 # 4. Add data to excel file
 
+# Some data needs to be fixed before it goes into excel
 def remove_brackets(input):
     return str(input).strip("[]")
 
 def remove_quote(input):
     return str(input).strip(" '' ")
-# Add the column headers and corresponding keys
 
-# print (column_names)
-# print (corresponding_keys)
-
-# FUNCTION to pass column headers from dict to excel 
+# FUNCTION - TITLE --> EXCEL to pass column headers from list to excel 
 def title_names_to_excel(input_names):
     column_index = 0 # setting counter iter for stringed loop
 
     for name in input_names:
         # print(name)
-
         column_index += 1
 
         column_letter = get_column_letter(column_index)
@@ -147,21 +143,23 @@ def check_column_letter_set_data(letter):
     return value 
 # check_column_letter_set_data("k") # returns error as expected
 
-# FUNCTION to catch None
-def catch_key(input_dict, key_catch, nested_key):
-    if input_dict.get(key_catch) is not None:
-        if nested_key is not None:
-            if nested_key in input_dict.get(key_catch):
-                return input_dict[key_catch][nested_key]
-            else: 
-                return None
-        else: 
-            return input_dict.get(key_catch)
-    else:
-        print("Very sneaky data!")
-        value = "Not available"
-        return input_dict.get(value)
-        # return None
+# # FUNCTION to catch None
+# def catch_key(input_list, key_catch, nested_key):
+#     # if input_list.get(key_catch) is not None:
+#     #     if nested_key is not None:
+#     #         if nested_key in input_list.get(key_catch):
+#     #             return input_list[key_catch][nested_key]
+#     #         else: 
+#     #             return None
+#     #     else: 
+#     #         return input_list.get(key_catch)
+#     if input_list[key_catch][nested_key] is None:
+#         print("Very sneaky data!")
+#         value = "Not available"
+#         return value
+#     else:
+#         return key_catch
+#         # return None
 
 # FUNCTION to find specific key-values
 def find_specific_key_values(input_dict):
@@ -224,31 +222,99 @@ def sorted_data_to_rows(input_data):
 
    
 # sorted_data_to_rows(sorted_data)
+# 
 
+# FUNCTION to catch None
+def catch_key(catch_list):
+    # input data is a list that contains a list, key, and second key
+    data_list = catch_list[0]
+    key_catch = catch_list[1]
+
+    if len(catch_list) == 3:
+        nested_catch = catch_list[2]
+        if key_catch in data_list:
+            if data_list[key_catch] is not None:
+                if nested_catch in data_list[key_catch]:
+                    return data_list[key_catch][nested_catch]
+                else:
+                    return "Not available"
+            else:
+                return "Not available"
+        else:
+            return "Not available"
+    else:
+        if key_catch in data_list:
+            return data_list[key_catch]
+        else:
+            return "Not available"
+
+
+
+# FUNCTION to find specific key-values
 def get_data_from_lists(input_data):
     for i in range(0,list_size):
         inner_data = input_data[i]
 
-        print("Sublist: {}".format(i))
+        print("Sublist: {}".format(i+1))
 
-
-        content = inner_data['content']
+        # TASK 
+        task_list = [inner_data, 'content']
+        content = catch_key(task_list)
+        if content == "Not Available":
+            continue
         print("{} = {}".format(column_names[0], content))
 
-        entity_code = inner_data['entity']['code']
+        # SET PART
+        set_part_list = [inner_data, 'entity', 'code']
+        entity_code = catch_key(set_part_list)
+        if entity_code == "Not Available":
+            continue
+        
+        # if inner_data['entity']['code'] is not None:
+            # entity_code = inner_data['entity']['code']
         code_no_bracket = remove_brackets(entity_code)
         code_no_quote = remove_quote(code_no_bracket)
         print("{} = {}".format(column_names[1], code_no_quote))
+        # else:
+            # print("entity code value is None")
 
-        sg_parent_build_code = inner_data['sg_parent_build']['code']
+        # PARENT BUILD 
+        parent_list = [inner_data, 'sg_parent_build', 'code']
+        sg_parent_build_code = catch_key(parent_list)
+        if sg_parent_build_code == "Not Available":
+            sg_parent_build_code = "Not Available"
+            continue
+
+        # sg_parent_build_code = inner_data['sg_parent_build']['code']
         sg_parent = remove_brackets(sg_parent_build_code)
         print("{} = {}".format(column_names[2], sg_parent))
+        # else:
+            # print("sg_parent_build code value is None")
 
-        start_date = inner_data['start_date']
+        
+        # START DATE
+        start_list = [inner_data, 'start_date']
+        start_date = catch_key(start_list)
+        if start_date == "Not Available":
+            continue
+
+        # if inner_data['start_date'] is not None:
+        #     start_date = inner_data['start_date']
         print("{} = {}".format(column_names[3], start_date))
+        # else:
+            # print("start_date value is None")
 
-        due_date = inner_data['due_date']
+        # END DATE 
+        end_list = [inner_data, 'due_date']
+        due_date = catch_key(end_list)
+        if due_date == "Not Available":
+            continue
+
+        # if inner_data['due_date'] is not None:
+            # due_date = inner_data['due_date']
         print("{} = {}\n".format(column_names[4], due_date))
+        # else:
+            # print("due_date value is None")
 
         print("=====================\n")
 
