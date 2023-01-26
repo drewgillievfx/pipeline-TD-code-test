@@ -23,7 +23,24 @@ def main():
         item_string = getItemString(item)
         email_body += '%s\n' % item_string
 
-    print email_body
+    print (email_body)
 
 if __name__ == '__main__':
     main()
+
+# Comments on solving this
+"""
+    1. Folding the functions we have a simple code structure
+        import pickle
+        getItemString - with an input item
+        main function
+        main test
+    2. Working parts
+        import
+        main test
+    3. Lets look at the main function
+        opening 'test_data.pkl' and unpickling checks out
+        potential issue line 21: email_body = ''
+        definite issue line 26: print email_body
+            should be print(email_body)
+"""
