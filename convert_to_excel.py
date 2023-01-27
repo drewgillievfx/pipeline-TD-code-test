@@ -1,11 +1,17 @@
 """
     convert_to_excel.py
     Start Date: 20230125
-    Version: 1.0
+    Version: 1.1
     Written by: Drew Gillie
 
     This code is written for the purpose of completing a coding challenge for
     Laika for the Media Systems Pipeline Technical Director Position
+
+    Version changelog:
+        1.0 Original submitted code.
+        1.1 Modify to run and process rather than script base
+
+    1.1 Notes: Oh! Right, I'm writing this in python, not MEL. I can run main.
 
     ##########################################################################
     Challenge #1
@@ -56,59 +62,33 @@ from datetime import datetime
 from openpyxl.styles import Font
 from openpyxl.styles import Alignment
 from openpyxl.styles import PatternFill
+import sys
 
-print('Start\n')  # Only for testing purposes---.
 
 ##############################################################################
-""" Variables, lists, etc. """
+##############################################################################
+##############################################################################
+""" section of code to delete when ready """
 
 
 column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date', 'End Date']
 corresponding_keys = ['content', 'entity', 'sg_parent_build',
-                      'start_date', 'due_date']
+                    'start_date', 'due_date']
 
 imported_data = 'test_data.pkl'
-workbook_title = 'converted_data.xlsx'
+file_name = 'test_data.pkl'
+workbook_title = file_name '_converted_data.xlsx'
 worksheet_title = 'Formatted'
 
 
-##############################################################################
-""" 1. Unpickle file and place into a list. """
-
-# Convert pickled data into a list.
-unpickled_data = open(imported_data, 'rb')
-data = pickle.load(unpickled_data)
-# print(data)  # [works] This is a list, not a dict.
-
-# Check type of the converted data.
-# t = type(data)  # Only for testing purposes---.
-# print('type = {}\n'.format(t))  # Only for testing purposes---.
-
-##############################################################################
-""" 2. Sort data by earliest start date. """
-
 # Find size - how many lists are inside this list.
-list_size = len(data)
-print('Size of list = {}\n'.format(list_size))
-
-sorted_data = sorted(data, key=lambda x: x['start_date'])
-# print(sorted_data) # [works].  # Only for testing purposes---.
-
+    list_size = len(data)
+    print('Size of list = {}\n'.format(list_size))
 ##############################################################################
-""" 3. Create an excel file. """
-
-wb = Workbook()
-ws = wb.active  # Add worksheet.
-ws.title = worksheet_title  # Change title.
-
 ##############################################################################
-""" 4. Add data to excel file after fixing some data. """
-
-"""
-This section of code is all about taking the input data from the .pkl
-file and converting it into simple lists.  The lists will then be added to
-excel.  Some issues will arise as some of the input data may return None.
-"""
+##############################################################################
+##############################################################################
+##############################################################################
 
 
 def remove_brackets(input):
@@ -437,9 +417,7 @@ def check_unavailable_data():  # Search for data with no entry point.
                 # Apply the formatting.
                 cell.font = font_change
 
-
-def format_data_on_excel():
-    date_to_check_from_excel()
+def format_data():
     format_title()
     center_align_cells(ws)
     right_align_column_a()
@@ -451,9 +429,80 @@ def format_data_on_excel():
     check_unavailable_data()
 
 
-format_data_on_excel()
+
+##############################################################################
+""" 1. Unpickle and sort data by earliest start date, place in list. """
+
+
+def unpickle_and_sort_data(data_in):
+    # Convert pickled data into a list.
+    unpickled_data = open(data_in, 'rb')
+    data = pickle.load(unpickled_data)
+
+    return = sorted(data, key=lambda x: x['start_date'])
 
 
 ##############################################################################
-wb.save(workbook_title)
-print('\nFinished')  # only for testing purposes
+""" 2. Create an excel file. """
+
+
+def create_excel_file(data_file_name):
+    wb = Workbook()  # Create a workbook.
+    ws = wb.active  # Add worksheet.
+    ws.title = 'Formatted'  # Change title.
+
+
+##############################################################################
+""" 3. Add data to excel file after fixing some data. """
+
+"""
+This section of code is all about taking the input data from the .pkl
+file and converting it into simple lists.  The lists will then be added to
+excel.  Some issues will arise as some of the input data may return None.
+"""
+def add_data_to_excel_file(data, data_file_name):
+
+##############################################################################
+"""
+Main function to process data with script. 
+
+An input file needs to be processed and automated so it creates and fills a 
+worksheet in excel.
+"""
+
+def process_data(file_to_process):
+    hidden_data = unpickle_and_sort_data(file_to_process)
+    
+    # Create an excel file using the file name of the data to be processed.
+    create_excel_file(file_to_process)
+    add_data_to_excel_file(hidden_data, file_to_process)
+    
+    
+
+##############################################################################
+##############################################################################
+
+if __name__ == '__main__':
+    print('Starting Script\n')  # Only for testing purposes---.
+
+    # Input file when script is run through command line
+    input_file = sys.argv[1]  # 'test_data.pkl'
+    output_file = (input_file + '_converted_data.xlsx')
+
+    # Unpickle, sort, and set up excel file
+    process_data(input_file)
+
+    wb.save(output_file)
+    print('\nFinished Processing')  # only for testing purposes
+
+"""
+Basic command line template:
+
+python3 this_script.py data_to_process.pkl
+
+Note: 
+Include full path
+
+python3 /convert_to_excel.py  /test_data.pkl 
+
+"""
