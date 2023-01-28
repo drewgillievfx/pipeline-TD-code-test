@@ -64,255 +64,6 @@ from openpyxl.styles import Alignment
 from openpyxl.styles import PatternFill
 import sys
 
-
-##############################################################################
-##############################################################################
-##############################################################################
-""" section of code to delete when ready """
-
-
-column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date', 'End Date']
-corresponding_keys = ['content', 'entity', 'sg_parent_build',
-                    'start_date', 'due_date']
-
-imported_data = 'test_data.pkl'
-file_name = 'test_data.pkl'
-workbook_title = file_name '_converted_data.xlsx'
-worksheet_title = 'Formatted'
-
-
-# Find size - how many lists are inside this list.
-    list_size = len(data)
-    print('Size of list = {}\n'.format(list_size))
-##############################################################################
-##############################################################################
-##############################################################################
-##############################################################################
-##############################################################################
-
-
-def remove_brackets(input):
-    return str(input).strip('[]')
-
-
-def remove_quote(input):
-    return str(input).strip(" '' ")
-
-
-def title_names_to_excel(input_names):  # Pass titles from list to excel.
-    column_index = 0  # Setting counter iter for stringed loop.
-
-    for name in input_names:
-        # print(name)  # Only for testing purposes---.
-        column_index += 1
-        column_letter = get_column_letter(column_index)
-        # column_index = column_index_from_string(name)
-        ws.cell(row=1, column=column_index, value=name)
-
-
-def check_column_letter_set_data(letter):  # check column and return value
-    try:
-        if letter == 'A':
-            value = 'content'  # Task Name.
-        elif letter == 'B':
-            value = 'entity-code'  # Part Name.
-        elif letter == 'C':
-            value = 'sg_parent_build-code'  # Parent Build Name.
-        elif letter == 'D':
-            value = 'start_date'  # Start Date.
-        elif letter == 'E':
-            value = 'due_date'  # End Date.
-        else:
-            raise ValueError('There are no columns for this data.')
-    except ValueError as e:
-        print('An error occured: ', e)
-        value = None
-    # print(value)  # Only for testing purposes---.
-    return value
-
-
-def find_specific_key_values(input_dict):  # Find specific key-values.
-    matching_values = []  # Create a list for values from keys.
-
-    # Add values from specific keys to list.
-
-    # 1. Task Name.
-    task_name = catch_key(input_dict, 'content', None)
-    matching_values.append(task_name)
-
-    # 2. Set Part Name.
-    # Need to remove brackets from  this data point.
-    set_part = remove_brackets(catch_key(input_dict, 'entity', 'code'))
-    matching_values.append(set_part)
-
-    # 3. Parent Build.
-    p_build = catch_key(input_dict, 'sg_parent_build', 'code')
-    parent_build = remove_quote(p_build)
-    matching_values.append(parent_build)
-
-    # 4. Start Date.
-    start_date = catch_key(input_dict, 'start_date', None)
-    matching_values.append(start_date)
-
-    # 5. End Date.
-    due_date = catch_key(input_dict, 'due_date', None)
-    matching_values.append(due_date)
-
-    # print('values : {}\n'.format(matching_values))  # Testing purposes---.
-    return matching_values
-
-
-# def sorted_data_to_rows(input_data):  # pass sorted data from dict to excel
-#     # print('Testing sorted_data_to_rows function\n') # Testing purposes---.
-#     # print('dict: {}\n'.format(input_data))
-#     """
-#     Note: if the data changes then this need to be updated.
-#     Possibly a different function to handle this is needed.
-#     """
-
-#     columns = ['A', 'B', 'C', 'D', 'E']
-#     rows = ['1', '2', '3', '4', '5']
-
-#     key_value = find_specific_key_values(input_data)
-
-#     for i, row in enumerate(range(2, (dict_size+2))):
-#         for j, col in enumerate(columns):
-#             print(f'Rows: {row}, Value: {col}')
-#             starting_row = 2
-#             cell_value = col
-#             ws[col + str(row)] = key_value[i][j]
-
-
-def catch_key(catch_list):  # Catch None error and return 'Not acailable'.
-    """
-    Input data = [list, key, nested key].
-
-    The list that is passed into this function contains 3 items.  The first
-    two variables are on each item that passes through, however the
-    third nested key variable only comes in with a few pieces of data.
-
-    Therefore, if it exists, run the case where all three are tested.
-    The thing being tested in this function is if a piece of data from
-    the .pkl file did not have an entry.  If no entry, then return a
-    phrase 'Not available' in order to keep the code running and note
-    this on the excel worksheet.
-    """
-    data_list = catch_list[0]
-    key_catch = catch_list[1]
-
-    if len(catch_list) == 3:
-        nested_catch = catch_list[2]
-        if key_catch in data_list:
-            if data_list[key_catch] is not None:
-                if nested_catch in data_list[key_catch]:
-                    return data_list[key_catch][nested_catch]
-                else:
-                    return 'Not available'
-            else:
-                return 'Not available'
-        else:
-            return 'Not available'
-    else:
-        if key_catch in data_list:
-            return data_list[key_catch]
-        else:
-            return 'Not available'
-
-
-def get_data_from_lists(input_data):  # Find specific key-values.
-    """
-    This is the main data conversion function.
-
-    The goal is to find the requested data that should be on the
-    spreadsheet.
-
-    First, this function creates a variable that contains 2-3 data points.
-    The input data, key used to find information, and a nested key, if data
-    is inside a list inside of the list (i.e. a nested list).  This data
-    gets sent to the catch_key function to make sure there actually is data.
-
-    When sent back, it will print the data to the terminal, then add to excel.
-
-    Some pieces of data may need to be corrected, this is done by removing
-    brackts "[]" and single quotes around text " '' ".
-
-    This is done for each list in the larger list converted from the .pkl
-    file.  This will look like this:
-    [
-        [list 0]
-        [list 1]
-        [etc.]
-    ]
-    """
-    for i in range(0, list_size):
-        inner_data = input_data[i]
-        print('Sublist: {}'.format(i+1))  # Testing purposes---.
-
-        # TASK ----------------------------------.
-        task_list = [inner_data, 'content']
-        content = catch_key(task_list)
-
-        if content == 'Not Available':
-            continue
-
-        print('{} = {}'.format(column_names[0], content))
-        ws.cell(row=i+2, column=1).value = content
-
-        # SET PART ----------------------------------.
-        set_part_list = [inner_data, 'entity', 'code']
-        entity_code = catch_key(set_part_list)
-
-        if entity_code == 'Not Available':
-            continue
-
-        code_no_bracket = remove_brackets(entity_code)
-        code_no_quote = remove_quote(code_no_bracket)
-
-        print('{} = {}'.format(column_names[1], code_no_quote))
-        ws.cell(row=i + 2, column=2).value = code_no_quote
-
-        # PARENT BUILD  ----------------------------------.
-        parent_list = [inner_data, 'sg_parent_build', 'code']
-        sg_parent_build_code = catch_key(parent_list)
-
-        if sg_parent_build_code == 'Not Available':
-            sg_parent_build_code = 'Not Available'
-            continue
-
-        sg_parent = remove_brackets(sg_parent_build_code)
-
-        print('{} = {}'.format(column_names[2], sg_parent))
-        ws.cell(row=i+2, column=3).value = sg_parent
-
-        # START DATE ----------------------------------.
-        start_list = [inner_data, 'start_date']
-        start_date = catch_key(start_list)
-
-        if start_date == 'Not Available':
-            continue
-
-        print('{} = {}'.format(column_names[3], start_date))
-        ws.cell(row=i+2, column=4).value = start_date
-
-        # END DATE ----------------------------------.
-        end_list = [inner_data, 'due_date']
-        due_date = catch_key(end_list)
-        if due_date == 'Not Available':
-            continue
-
-        print('{} = {}\n'.format(column_names[4], due_date))
-        ws.cell(row=i+2, column=5).value = due_date
-
-        print('=====================\n')  # Visual element for debugging.
-
-
-def send_data_to_excel():  # FINAL FUNCTION
-    # check_column_letter_set_data('k') # returns error as expected
-    title_names_to_excel(column_names)
-    get_data_from_lists(sorted_data)
-
-
-send_data_to_excel()
 ##############################################################################
 # 5. Format data
 """ This section of code is dedicated to reformatting the data on excel. """
@@ -427,19 +178,207 @@ def format_data():
         autofit_columns(column)
 
     check_unavailable_data()
+##############################################################################
+
+class CapturedData:
+    def __init__(self, object_name, task_name, set_part,
+                 parent_build, start_date: None,
+                 end_date: None):
+
+        self.object_name = object_name
+        self.task_name = task_name
+        self.set_part = set_part
+        self.parent_build = parent_build
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def set_start_date(self, date):
+        self.start_date = date
+    
+    def set_start_date(self, date_string):
+        date_format = "%Y-%m-%d"
+        self.start_date = datetime.strptime(date_string, date_format)
+
+
+data_entry_1 = CapturedData("task1", "set1", "build1")
+data_entry_1.set_start_date("2021-01-01")
+print(data_entry_1.start_date)
+
+
+
+
+    
+
+
+
+##############################################################################
+##############################################################################
+""" section of code to delete when ready """
+
+
+column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date', 'End Date']
+corresponding_keys = ['content', 'entity', 'sg_parent_build',
+                    'start_date', 'due_date']
+
+
+
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+
+
+def remove_brackets(input):
+    return str(input).strip('[]')
+
+
+def remove_quote(input):
+    return str(input).strip(" '' ")
+
+
+
+
+def check_column_letter_set_data(letter):  # check column and return value
+    try:
+        if letter == 'A':
+            value = 'content'  # Task Name.
+        elif letter == 'B':
+            value = 'entity-code'  # Part Name.
+        elif letter == 'C':
+            value = 'sg_parent_build-code'  # Parent Build Name.
+        elif letter == 'D':
+            value = 'start_date'  # Start Date.
+        elif letter == 'E':
+            value = 'due_date'  # End Date.
+        else:
+            raise ValueError('There are no columns for this data.')
+    except ValueError as e:
+        print('An error occured: ', e)
+        value = None
+    # print(value)  # Only for testing purposes---.
+    return value
+
+
+def find_specific_key_values(input_dict):  # Find specific key-values.
+    matching_values = []  # Create a list for values from keys.
+
+    # Add values from specific keys to list.
+
+    # 1. Task Name.
+    task_name = catch_key(input_dict, 'content', None)
+    matching_values.append(task_name)
+
+    # 2. Set Part Name.
+    # Need to remove brackets from  this data point.
+    set_part = remove_brackets(catch_key(input_dict, 'entity', 'code'))
+    matching_values.append(set_part)
+
+    # 3. Parent Build.
+    p_build = catch_key(input_dict, 'sg_parent_build', 'code')
+    parent_build = remove_quote(p_build)
+    matching_values.append(parent_build)
+
+    # 4. Start Date.
+    start_date = catch_key(input_dict, 'start_date', None)
+    matching_values.append(start_date)
+
+    # 5. End Date.
+    due_date = catch_key(input_dict, 'due_date', None)
+    matching_values.append(due_date)
+
+    # print('values : {}\n'.format(matching_values))  # Testing purposes---.
+    return matching_values
+
+
+
 
 
 
 ##############################################################################
 """ 1. Unpickle and sort data by earliest start date, place in list. """
 
+def get_value(input_data, key_code):  # Find specific key-values.
+    """
+    This is the main data conversion function.
 
-def unpickle_and_sort_data(data_in):
+    The goal is to find the requested data that should be on the
+    spreadsheet.
+
+    When an object is created, it will set object traits to the value it 
+    should be.  This function retreives the value for the associated key.
+
+    Some pieces of data may need to be corrected, this is done by removing
+    brackts "[]" and single quotes around text " '' ".
+    """
+
+    switcher = {
+        'task_name': ('content', None),
+        'set_part': ('entity', 'code'),
+        'parent_build': ('sg_parent_build', 'code'),
+        'start_date': ('start_date', None),
+        'due_date': ('due_date', None)
+    }
+    if key_code not in switcher:
+        return 'Invalid Key (key_code'
+
+    # Find the corresponding key-value pair
+    key_values = switcher.get(key_code) # Get the key-cade value
+
+    # if the pair has a nested list, get the nested value
+    if key_values[1] is not None:
+        returned_key = input_data[key_values[0]][key_values[1]]
+    else:  # get the normal value
+        returned_key = input_data[key_values[0]]
+    # Some data may not exist, 
+    if returned_key is None:
+        returned_key = 'Not available'
+
+    # Fix formatting issues with data, check for [] and '.
+    bracket = ('[' + returned_key + ']')
+    quote = ("'" + returned_key + "'")
+
+    if returned_key == bracket:
+        returned_key = remove_brackets(returned_key)
+    if returned_key == quote:
+        returned_key = remove_quote(returned_key)
+
+    return returned_key
+
+
+def create_new_data_objects(data_in):
     # Convert pickled data into a list.
     unpickled_data = open(data_in, 'rb')
     data = pickle.load(unpickled_data)
 
-    return = sorted(data, key=lambda x: x['start_date'])
+    # Sort data by start date now
+    sorted_data = sorted(data, key=lambda x: x['start_date'])
+
+    # Find size - how many lists are inside this list.
+    list_size = len(sorted_data)
+    print('Size of list = {}\n'.format(list_size))
+
+    # List of objects created from data
+    captured_data_list = []
+    for i in range(0, list_size):
+        object_name = ('object_' + i)
+        captured_data_list.append(CapturedData(object_name))
+
+    for objects in captured_data_list:
+        """
+        For each object, set specific_data to list index
+        The List index is which data entry point in the larger list.  Then set
+        the object attribute to the key:value pair
+        """
+        specific_data = sorted_data[objects]
+        objects.task_name = get_value(specific_data, 'task_name')
+        objects.set_part = get_value(specific_data, 'set_part')
+        objects.parent_build = get_value(specific_data, 'parent_build')
+        objects.start_date = get_value(specific_data, 'start_date')
+        objects.end_date = get_value(specific_data, 'due_date')
+        
+        ws.cell(row=i+2, column=1).value = content
+
 
 
 ##############################################################################
@@ -460,7 +399,24 @@ This section of code is all about taking the input data from the .pkl
 file and converting it into simple lists.  The lists will then be added to
 excel.  Some issues will arise as some of the input data may return None.
 """
+
+def title_names_to_excel(input_names):  # Pass titles from list to excel.
+    column_index = 0  # Setting counter iter for stringed loop.
+
+    for name in input_names:
+        # print(name)  # Only for testing purposes---.
+        column_index += 1
+        column_letter = get_column_letter(column_index)
+        # column_index = column_index_from_string(name)
+        ws.cell(row=1, column=column_index, value=name)
+
+
 def add_data_to_excel_file(data, data_file_name):
+    column_names = []  # Find names for titles that match requirements
+    title_names_to_excel(column_names)
+    get_data_from_lists(sorted_data)
+
+
 
 ##############################################################################
 """
