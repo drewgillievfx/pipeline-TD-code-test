@@ -125,7 +125,128 @@ def create_excel_file(data_file_name):
     # Create file name and save file.
     output_file = (data_file_name + '_converted_data.xlsx')
     wb.save(output_file)
+
+
+##############################################################################
+""" 3. Add data to excel file after fixing some data. """
+
+"""
+This section of code is all about taking the input data from the .pkl
+file and converting it into simple lists.  The lists will then be added to
+excel.  Some issues will arise as some of the input data may return None.
+"""
+def get_value(input_data, key_code):  # Find specific key-values.
+    """
+    This is the main data conversion function.
+
+    The goal is to find the requested data that should be on the
+    spreadsheet.
+
+    When an object is created, it will set object traits to the value it 
+    should be.  This function retreives the value for the associated key.
+
+    Some pieces of data may need to be corrected, this is done by removing
+    brackts "[]" and single quotes around text " '' ".
+    """
+
+    switcher = {
+        'task_name': ('content', None),
+        'set_part': ('entity', 'code'),
+        'parent_build': ('sg_parent_build', 'code'),
+        'start_date': ('start_date', None),
+        'due_date': ('due_date', None)
+    }
+    if key_code not in switcher:
+        return 'Invalid Key (key_code'
+
+    # # Find the corresponding key-value pair
+    key_values = switcher.get(key_code) # Get the key-cade value
+
+    # # if the pair has a nested list, get the nested value
+    # if key_values[1] is not None:
+    #     returned_key = input_data[key_values[0]][key_values[1]]
+    # else:  # get the normal value
+    #     returned_key = input_data[key_values[0]]
+    # # Some data may not exist, 
+    # if returned_key is None:
+    #     returned_key = 'Not available'
+
+    # # Fix formatting issues with data, check for [] and '.
+    # if key_values[0].startswith('[') and key_values[0].endswith(']'):
+    #     returned_key = remove_brackets(returned_key)
+
+    # if key_values[0].startswith("'") and key_values[0].endswith("'"):
+    #     returned_key = remove_quote(returned_key)
+
+    # print(('return key = ').format(returned_key))
+    returned_key = key_values
+
+    return returned_key
+
+
+
+def create_new_data_objects(data_in):
+    print('####################------##############')
+    # Convert pickled data into a list.
+    unpickled_data = open(data_in, 'rb')
+    data = pickle.load(unpickled_data)
+
+    # Sort data by start date now
+    sorted_data = sorted(data, key=lambda x: x['start_date'])
+
+    # Find size - how many lists are inside this list.
+    list_size = len(sorted_data)
+    print('Size of list = {}\n'.format(list_size))
+
+    # ws = Workbook().active  # Add worksheet.
+
+    # List of objects created from data.
+    captured_data_list = []
+    for i in range(0, list_size):
+        object_name = ('object_row_' + str(i+2))
+        captured_data_list.append(CapturedData(object_name,'','','','',''))
+
+
+    for index, objects in enumerate(captured_data_list):
+        """
+        For each object, set specific_data to list index
+        The List index is which data entry point in the larger list.  Then set
+        the object attribute to the key:value pair
+        """
+
+        specific_data = sorted_data[index]
+        objects.task_name = get_value(specific_data, 'task_name')
+        objects.set_part = get_value(specific_data, 'set_part')
+        objects.parent_build = get_value(specific_data, 'parent_build')
+        objects.start_date = get_value(specific_data, 'start_date')
+        objects.end_date = get_value(specific_data, 'due_date')
+        
+        # set_cell_value(ws, 2, 1, objects.task_name)
+        # set_cell_value(ws, 2, 2, objects.set_part)
+        # set_cell_value(ws, 2, 3, objects.parent_build)
+        # set_cell_value(ws, 2, 4, objects.start_date)
+        # set_cell_value(ws, 2, 5, objects.end_date)
+
+
+        objects.print_status()
+        print(F'------------------------------------\n')
+
+"""
+Main function to process data with script. 
+
+An input file needs to be processed and automated so it creates and fills a 
+worksheet in excel.
+"""
+
+def process_data(file_to_process):
+    # Create an excel file using the file name of the data to be processed.
+    create_excel_file(file_to_process)
     
+    # Create objects for each row of data.  Place data in excel.
+    create_new_data_objects(file_to_process)
+    
+
+
 
 ##############################################################################
 ##############################################################################
@@ -134,13 +255,12 @@ if __name__ == '__main__':
     print('\nStarting Script\n')  # Only for testing purposes--------------.
     a = CapturedData('a1', 'build', 'roof', 'horace', '2016-12-05', '2017-1-23')
     a.print_status()
-    
+
     # Input file when script is run through command line
     input_file = sys.argv[1]  # 'test_data.pkl'
-    create_excel_file(input_file)
 
     # Unpickle, sort, and set up excel file.
-    # process_data(input_file)
+    process_data(input_file)
 
     # Select data in excel and format it.
     # format_data()
