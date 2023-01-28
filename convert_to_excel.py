@@ -111,21 +111,6 @@ def set_cell_value(worksheet, row, col, value):
     cell.value = converted_value
 
 
-def create_excel_file(data_file_name):
-    wb = Workbook()  # Create a workbook.
-    ws = wb.active  # Add worksheet.
-    ws.title = 'Formatted'  # Change title.
-
-    # Pass titles from column_names list to excel.
-    for i in range(1,(len(column_names)+1)):
-        title = str(column_names[i-1])
-
-        set_cell_value(ws, 1, i, title)
-
-    # Create file name and save file.
-    output_file = (data_file_name + '_converted_data.xlsx')
-    wb.save(output_file)
-
 
 ##############################################################################
 """ 3. Add data to excel file after fixing some data. """
@@ -135,6 +120,48 @@ This section of code is all about taking the input data from the .pkl
 file and converting it into simple lists.  The lists will then be added to
 excel.  Some issues will arise as some of the input data may return None.
 """
+def remove_brackets(input):
+    return str(input).strip('[]')
+
+
+def remove_quote(input):
+    return str(input).strip(" '' ")
+
+
+def catch_key(catch_list):  # Catch None error and return 'Not acailable'.
+    """
+    Input data = [list, key, nested key].
+    The list that is passed into this function contains 3 items.  The first
+    two variables are on each item that passes through, however the
+    third nested key variable only comes in with a few pieces of data.
+    Therefore, if it exists, run the case where all three are tested.
+    The thing being tested in this function is if a piece of data from
+    the .pkl file did not have an entry.  If no entry, then return a
+    phrase 'Not available' in order to keep the code running and note
+    this on the excel worksheet.
+    """
+    data_list = catch_list[0]
+    key_catch = catch_list[1]
+
+    if len(catch_list) == 3:
+        nested_catch = catch_list[2]
+        if key_catch in data_list:
+            if data_list[key_catch] is not None:
+                if nested_catch in data_list[key_catch]:
+                    return data_list[key_catch][nested_catch]
+                else:
+                    return 'Not available'
+            else:
+                return 'Not available'
+        else:
+            return 'Not available'
+    else:
+        if key_catch in data_list:
+            return data_list[key_catch]
+        else:
+            return 'Not available'
+
+
 def get_value(input_data, key_code):  # Find specific key-values.
     """
     This is the main data conversion function.
@@ -161,28 +188,30 @@ def get_value(input_data, key_code):  # Find specific key-values.
 
     # # Find the corresponding key-value pair
     key_values = switcher.get(key_code) # Get the key-cade value
+    # key_values = input_data['sg_parent_build']['code']
 
-    # # if the pair has a nested list, get the nested value
-    # if key_values[1] is not None:
-    #     returned_key = input_data[key_values[0]][key_values[1]]
-    # else:  # get the normal value
-    #     returned_key = input_data[key_values[0]]
-    # # Some data may not exist, 
-    # if returned_key is None:
-    #     returned_key = 'Not available'
 
-    # # Fix formatting issues with data, check for [] and '.
-    # if key_values[0].startswith('[') and key_values[0].endswith(']'):
-    #     returned_key = remove_brackets(returned_key)
+      
 
-    # if key_values[0].startswith("'") and key_values[0].endswith("'"):
-    #     returned_key = remove_quote(returned_key)
+    # if the pair has a nested list, get the nested value
+    if key_values[1] is not None:
+        content_list = [input_data, key_values[0], key_values[1]]
 
-    # print(('return key = ').format(returned_key))
-    returned_key = key_values
+        # returned_key = input_data[key_values[0]][key_values[1]]
+    else:  # get the normal value
+        content_list = [input_data, key_values[0]]
+
+        # returned_key = input_data[key_values[0]]
+    returned_key = catch_key(content_list)
+    
+    # Some data may not exist, 
+    if returned_key is None:
+        returned_key = 'Not available'
+
+    returned_key = remove_brackets(returned_key)
+    returned_key = remove_quote(returned_key)
 
     return returned_key
-
 
 
 def create_new_data_objects(data_in):
@@ -198,8 +227,6 @@ def create_new_data_objects(data_in):
     list_size = len(sorted_data)
     print('Size of list = {}\n'.format(list_size))
 
-    # ws = Workbook().active  # Add worksheet.
-
     # List of objects created from data.
     captured_data_list = []
     for i in range(0, list_size):
@@ -213,7 +240,8 @@ def create_new_data_objects(data_in):
         The List index is which data entry point in the larger list.  Then set
         the object attribute to the key:value pair
         """
-
+        print(F'index {index}')
+        row_number = index + 2
         specific_data = sorted_data[index]
         objects.task_name = get_value(specific_data, 'task_name')
         objects.set_part = get_value(specific_data, 'set_part')
@@ -221,12 +249,11 @@ def create_new_data_objects(data_in):
         objects.start_date = get_value(specific_data, 'start_date')
         objects.end_date = get_value(specific_data, 'due_date')
         
-        # set_cell_value(ws, 2, 1, objects.task_name)
-        # set_cell_value(ws, 2, 2, objects.set_part)
-        # set_cell_value(ws, 2, 3, objects.parent_build)
-        # set_cell_value(ws, 2, 4, objects.start_date)
-        # set_cell_value(ws, 2, 5, objects.end_date)
-
+        set_cell_value(ws, row_number, 1, objects.task_name)
+        set_cell_value(ws, row_number, 2, objects.set_part)
+        set_cell_value(ws, row_number, 3, objects.parent_build)
+        set_cell_value(ws, row_number, 4, objects.start_date)
+        set_cell_value(ws, row_number, 5, objects.end_date)
 
         objects.print_status()
         print(F'------------------------------------\n')
@@ -239,8 +266,6 @@ worksheet in excel.
 """
 
 def process_data(file_to_process):
-    # Create an excel file using the file name of the data to be processed.
-    create_excel_file(file_to_process)
     
     # Create objects for each row of data.  Place data in excel.
     create_new_data_objects(file_to_process)
@@ -256,6 +281,19 @@ if __name__ == '__main__':
     a = CapturedData('a1', 'build', 'roof', 'horace', '2016-12-05', '2017-1-23')
     a.print_status()
 
+
+    # Create an excel file using the file name of the data to be processed.
+    wb = Workbook()  # Create a workbook.
+    ws = wb.active  # Add worksheet.
+    ws.title = 'Formatted'  # Change title.
+
+    # Pass titles from column_names list to excel.
+    for i in range(1,(len(column_names)+1)):
+        title = str(column_names[i-1])
+
+        set_cell_value(ws, 1, i, title)
+
+
     # Input file when script is run through command line
     input_file = sys.argv[1]  # 'test_data.pkl'
 
@@ -265,4 +303,9 @@ if __name__ == '__main__':
     # Select data in excel and format it.
     # format_data()
     
+    
+
+    # Create file name and save file.
+    output_file = (input_file + '_converted_data.xlsx')
+    wb.save(output_file)
     print('\nFinished Processing')  # Only for testing purposes----------.
