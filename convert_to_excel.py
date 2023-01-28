@@ -181,11 +181,11 @@ def format_data():
 ##############################################################################
 
 class CapturedData:
-    def __init__(self, object_name, task_name, set_part,
+    def __init__(self, task_name, set_part,
                  parent_build, start_date: None,
                  end_date: None):
 
-        self.object_name = object_name
+        # self.object_name = object_name
         self.task_name = task_name
         self.set_part = set_part
         self.parent_build = parent_build
@@ -200,16 +200,6 @@ class CapturedData:
         self.start_date = datetime.strptime(date_string, date_format)
 
 
-data_entry_1 = CapturedData("task1", "set1", "build1")
-data_entry_1.set_start_date("2021-01-01")
-print(data_entry_1.start_date)
-
-
-
-
-    
-
-
 
 ##############################################################################
 ##############################################################################
@@ -217,8 +207,67 @@ print(data_entry_1.start_date)
 
 
 column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date', 'End Date']
-corresponding_keys = ['content', 'entity', 'sg_parent_build',
-                    'start_date', 'due_date']
+# corresponding_keys = ['content', 'entity', 'sg_parent_build',
+#                     'start_date', 'due_date']
+
+# data_entry_1 = CapturedData("task1", "set1", "build1")
+# data_entry_1.set_start_date("2021-01-01")
+# print(data_entry_1.start_date)
+# def add_data_to_excel_file(data, data_file_name):
+#     column_names = []  # Find names for titles that match requirements
+#     get_data_from_lists(sorted_data)
+
+# def check_column_letter_set_data(letter):  # check column and return value
+#     try:
+#         if letter == 'A':
+#             value = 'content'  # Task Name.
+#         elif letter == 'B':
+#             value = 'entity-code'  # Part Name.
+#         elif letter == 'C':
+#             value = 'sg_parent_build-code'  # Parent Build Name.
+#         elif letter == 'D':
+#             value = 'start_date'  # Start Date.
+#         elif letter == 'E':
+#             value = 'due_date'  # End Date.
+#         else:
+#             raise ValueError('There are no columns for this data.')
+#     except ValueError as e:
+#         print('An error occured: ', e)
+#         value = None
+#     # print(value)  # Only for testing purposes---.
+#     return value
+
+
+# def find_specific_key_values(input_dict):  # Find specific key-values.
+#     matching_values = []  # Create a list for values from keys.
+
+#     # Add values from specific keys to list.
+
+#     # 1. Task Name.
+#     task_name = catch_key(input_dict, 'content', None)
+#     matching_values.append(task_name)
+
+#     # 2. Set Part Name.
+#     # Need to remove brackets from  this data point.
+#     set_part = remove_brackets(catch_key(input_dict, 'entity', 'code'))
+#     matching_values.append(set_part)
+
+#     # 3. Parent Build.
+#     p_build = catch_key(input_dict, 'sg_parent_build', 'code')
+#     parent_build = remove_quote(p_build)
+#     matching_values.append(parent_build)
+
+#     # 4. Start Date.
+#     start_date = catch_key(input_dict, 'start_date', None)
+#     matching_values.append(start_date)
+
+#     # 5. End Date.
+#     due_date = catch_key(input_dict, 'due_date', None)
+#     matching_values.append(due_date)
+
+#     # print('values : {}\n'.format(matching_values))  # Testing purposes---.
+#     return matching_values
+
 
 
 
@@ -228,67 +277,6 @@ corresponding_keys = ['content', 'entity', 'sg_parent_build',
 ##############################################################################
 ##############################################################################
 
-
-def remove_brackets(input):
-    return str(input).strip('[]')
-
-
-def remove_quote(input):
-    return str(input).strip(" '' ")
-
-
-
-
-def check_column_letter_set_data(letter):  # check column and return value
-    try:
-        if letter == 'A':
-            value = 'content'  # Task Name.
-        elif letter == 'B':
-            value = 'entity-code'  # Part Name.
-        elif letter == 'C':
-            value = 'sg_parent_build-code'  # Parent Build Name.
-        elif letter == 'D':
-            value = 'start_date'  # Start Date.
-        elif letter == 'E':
-            value = 'due_date'  # End Date.
-        else:
-            raise ValueError('There are no columns for this data.')
-    except ValueError as e:
-        print('An error occured: ', e)
-        value = None
-    # print(value)  # Only for testing purposes---.
-    return value
-
-
-def find_specific_key_values(input_dict):  # Find specific key-values.
-    matching_values = []  # Create a list for values from keys.
-
-    # Add values from specific keys to list.
-
-    # 1. Task Name.
-    task_name = catch_key(input_dict, 'content', None)
-    matching_values.append(task_name)
-
-    # 2. Set Part Name.
-    # Need to remove brackets from  this data point.
-    set_part = remove_brackets(catch_key(input_dict, 'entity', 'code'))
-    matching_values.append(set_part)
-
-    # 3. Parent Build.
-    p_build = catch_key(input_dict, 'sg_parent_build', 'code')
-    parent_build = remove_quote(p_build)
-    matching_values.append(parent_build)
-
-    # 4. Start Date.
-    start_date = catch_key(input_dict, 'start_date', None)
-    matching_values.append(start_date)
-
-    # 5. End Date.
-    due_date = catch_key(input_dict, 'due_date', None)
-    matching_values.append(due_date)
-
-    # print('values : {}\n'.format(matching_values))  # Testing purposes---.
-    return matching_values
 
 
 
@@ -297,6 +285,13 @@ def find_specific_key_values(input_dict):  # Find specific key-values.
 
 ##############################################################################
 """ 1. Unpickle and sort data by earliest start date, place in list. """
+def remove_brackets(input):
+    return str(input).strip('[]')
+
+
+def remove_quote(input):
+    return str(input).strip(" '' ")
+
 
 def get_value(input_data, key_code):  # Find specific key-values.
     """
@@ -335,50 +330,18 @@ def get_value(input_data, key_code):  # Find specific key-values.
         returned_key = 'Not available'
 
     # Fix formatting issues with data, check for [] and '.
-    bracket = ('[' + returned_key + ']')
-    quote = ("'" + returned_key + "'")
-
-    if returned_key == bracket:
+    if key_values[0].startswith('[') and key_values[0].endswith(']'):
         returned_key = remove_brackets(returned_key)
-    if returned_key == quote:
+
+    if key_values[0].startswith("'") and key_values[0].endswith("'"):
         returned_key = remove_quote(returned_key)
 
     return returned_key
 
 
-def create_new_data_objects(data_in):
-    # Convert pickled data into a list.
-    unpickled_data = open(data_in, 'rb')
-    data = pickle.load(unpickled_data)
-
-    # Sort data by start date now
-    sorted_data = sorted(data, key=lambda x: x['start_date'])
-
-    # Find size - how many lists are inside this list.
-    list_size = len(sorted_data)
-    print('Size of list = {}\n'.format(list_size))
-
-    # List of objects created from data
-    captured_data_list = []
-    for i in range(0, list_size):
-        object_name = ('object_' + i)
-        captured_data_list.append(CapturedData(object_name))
-
-    for objects in captured_data_list:
-        """
-        For each object, set specific_data to list index
-        The List index is which data entry point in the larger list.  Then set
-        the object attribute to the key:value pair
-        """
-        specific_data = sorted_data[objects]
-        objects.task_name = get_value(specific_data, 'task_name')
-        objects.set_part = get_value(specific_data, 'set_part')
-        objects.parent_build = get_value(specific_data, 'parent_build')
-        objects.start_date = get_value(specific_data, 'start_date')
-        objects.end_date = get_value(specific_data, 'due_date')
-        
-        ws.cell(row=i+2, column=1).value = content
-
+def set_cell_value(ws, row, col, value):
+    cell = ws.cell(row=row, column=col)
+    cell.value = value
 
 
 ##############################################################################
@@ -400,21 +363,57 @@ file and converting it into simple lists.  The lists will then be added to
 excel.  Some issues will arise as some of the input data may return None.
 """
 
-def title_names_to_excel(input_names):  # Pass titles from list to excel.
+def set_title_names_in_excel(input_names):  # Pass titles from list to excel.
     column_index = 0  # Setting counter iter for stringed loop.
 
     for name in input_names:
         # print(name)  # Only for testing purposes---.
         column_index += 1
-        column_letter = get_column_letter(column_index)
+        # column_letter = get_column_letter(column_index)
         # column_index = column_index_from_string(name)
         ws.cell(row=1, column=column_index, value=name)
 
 
-def add_data_to_excel_file(data, data_file_name):
-    column_names = []  # Find names for titles that match requirements
-    title_names_to_excel(column_names)
-    get_data_from_lists(sorted_data)
+
+
+
+def create_new_data_objects(data_in):
+    print('####################------##############')
+    # Convert pickled data into a list.
+    unpickled_data = open(data_in, 'rb')
+    data = pickle.load(unpickled_data)
+
+    # Sort data by start date now
+    sorted_data = sorted(data, key=lambda x: x['start_date'])
+
+    # Find size - how many lists are inside this list.
+    list_size = len(sorted_data)
+    print('Size of list = {}\n'.format(list_size))
+
+    # List of objects created from data
+    captured_data_list = []
+    for i in range(0, list_size):
+        # object_name = ('object_' + str(i))
+        captured_data_list.append(CapturedData('','','','',''))
+
+    for index, objects in enumerate(captured_data_list):
+        """
+        For each object, set specific_data to list index
+        The List index is which data entry point in the larger list.  Then set
+        the object attribute to the key:value pair
+        """
+        specific_data = sorted_data[index]
+        objects.task_name = get_value(specific_data, 'task_name')
+        objects.set_part = get_value(specific_data, 'set_part')
+        objects.parent_build = get_value(specific_data, 'parent_build')
+        objects.start_date = get_value(specific_data, 'start_date')
+        objects.end_date = get_value(specific_data, 'due_date')
+        
+        set_cell_value(ws, objects, 'A', objects.task_name)
+        set_cell_value(ws, objects, 'B', objects.set_part)
+        set_cell_value(ws, objects, 'C', objects.parent_build)
+        set_cell_value(ws, objects, 'D', objects.start_date)
+        set_cell_value(ws, objects, 'E', objects.end_date)
 
 
 
@@ -427,29 +426,32 @@ worksheet in excel.
 """
 
 def process_data(file_to_process):
-    hidden_data = unpickle_and_sort_data(file_to_process)
-    
     # Create an excel file using the file name of the data to be processed.
     create_excel_file(file_to_process)
-    add_data_to_excel_file(hidden_data, file_to_process)
     
+    # Create objects for each row of data.  Place data in excel.
+    create_new_data_objects(file_to_process)
     
+    set_title_names_in_excel(column_names)
 
 ##############################################################################
 ##############################################################################
 
 if __name__ == '__main__':
-    print('Starting Script\n')  # Only for testing purposes---.
+    print('\nStarting Script\n')  # Only for testing purposes--------------.
 
     # Input file when script is run through command line
     input_file = sys.argv[1]  # 'test_data.pkl'
     output_file = (input_file + '_converted_data.xlsx')
 
-    # Unpickle, sort, and set up excel file
+    # Unpickle, sort, and set up excel file.
     process_data(input_file)
 
+    # Select data in excel and format it.
+    format_data()
+
     wb.save(output_file)
-    print('\nFinished Processing')  # only for testing purposes
+    print('\nFinished Processing')  # Only for testing purposes----------.
 
 """
 Basic command line template:
