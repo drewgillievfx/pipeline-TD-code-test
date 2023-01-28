@@ -63,14 +63,14 @@ from openpyxl.styles import Font
 from openpyxl.styles import Alignment
 from openpyxl.styles import PatternFill
 import sys
-
+import os
 ##############################################################################
-""" Variables to change for different type of data sheets. """
-column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date', 'End Date']
+
 
 
 ##############################################################################
 """ 1. Defining the data class. """
+
 
 class CapturedData:
     def __init__(self, object_name, task_name, set_part,
@@ -91,26 +91,37 @@ class CapturedData:
         print(F'parent_build = {self.parent_build}')
         print(F'start_date = {self.start_date}')
         print(F'end_date = {self.end_date}')
-        
 
-    
-    def set_start_date(self, date_string):
+    # These two functions are only used if the data parsed, does not work.
+    def set_start_date(self):
         date_format = "%Y-%m-%d"
-        self.start_date = datetime.strptime(date_string, date_format)
+        self.start_date = datetime.strptime(self.start_date, date_format)
+        self.start_date = self.start_date.strftime("%Y-%m-%d")
 
-    def set_end_date(self, date_string):
+    def set_end_date(self):
         date_format = "%Y-%m-%d"
-        self.end_date = datetime.strptime(date_string, date_format)
+        self.end_date = datetime.strptime(self.end_date, date_format)
+        self.end_date = self.end_date.strftime("%Y-%m-%d")
 
 ##############################################################################
 """ 2. Create an excel file. """
 
+def check_file_type(file_to_check):
+    if file_to_check.endswith('.pkl'):
+        return True
+    else:
+        return False
+
 
 def set_cell_value(worksheet, row, col, value):
     cell = worksheet.cell(row=row, column=col)
-    converted_value = ''.join(value)
+    if not isinstance(value, str):
+        # converted_value = ''.join(value)
+        converted_value = str(value)
+    else:
+        converted_value = value
+        
     cell.value = converted_value
-
 
 
 ##############################################################################
@@ -121,6 +132,8 @@ This section of code is all about taking the input data from the .pkl
 file and converting it into simple lists.  The lists will then be added to
 excel.  Some issues will arise as some of the input data may return None.
 """
+
+
 def remove_brackets(input):
     return str(input).strip('[]')
 
@@ -163,14 +176,14 @@ def catch_key(catch_list):  # Catch None error and return 'Not acailable'.
             return 'Not available'
 
 
-def get_value(input_data, key_code):  # Find specific key-values.
+def get_value(input_data, key_code, title_list):  # Find specific key-values.
     """
     This is the main data conversion function.
 
     The goal is to find the requested data that should be on the
     spreadsheet.
 
-    When an object is created, it will set object traits to the value it 
+    When an object is created, it will set object traits to the value it
     should be.  This function retreives the value for the associated key.
 
     Some pieces of data may need to be corrected, this is done by removing
@@ -178,21 +191,17 @@ def get_value(input_data, key_code):  # Find specific key-values.
     """
 
     switcher = {
-        'task_name': ('content', None),
-        'set_part': ('entity', 'code'),
-        'parent_build': ('sg_parent_build', 'code'),
-        'start_date': ('start_date', None),
-        'due_date': ('due_date', None)
+        title_list[0]: ('content', None),
+        title_list[1]: ('entity', 'code'),
+        title_list[2]: ('sg_parent_build', 'code'),
+        title_list[3]: ('start_date', None),
+        title_list[4]: ('due_date', None)
     }
     if key_code not in switcher:
         return 'Invalid Key (key_code'
 
     # # Find the corresponding key-value pair
-    key_values = switcher.get(key_code) # Get the key-cade value
-    # key_values = input_data['sg_parent_build']['code']
-
-
-      
+    key_values = switcher.get(key_code)  # Get the key-cade value
 
     # if the pair has a nested list, get the nested value
     if key_values[1] is not None:
@@ -204,8 +213,8 @@ def get_value(input_data, key_code):  # Find specific key-values.
 
         # returned_key = input_data[key_values[0]]
     returned_key = catch_key(content_list)
-    
-    # Some data may not exist, 
+
+    # Some data may not exist,
     if returned_key is None:
         returned_key = 'Not available'
 
@@ -215,7 +224,7 @@ def get_value(input_data, key_code):  # Find specific key-values.
     return returned_key
 
 
-def process_data(data_in):
+def process_data(data_in, data_categories):
     print('####################------##############')
     # Convert pickled data into a list.
     unpickled_data = open(data_in, 'rb')
@@ -231,9 +240,8 @@ def process_data(data_in):
     # List of objects created from data.
     captured_data_list = []
     for i in range(0, list_size):
-        object_name = ('object_row_' + str(i+2))
-        captured_data_list.append(CapturedData(object_name,'','','','',''))
-
+        obj_name = ('object_row_' + str(i+2))
+        captured_data_list.append(CapturedData(obj_name, '', '', '', '', ''))
 
     for index, objects in enumerate(captured_data_list):
         """
@@ -241,15 +249,30 @@ def process_data(data_in):
         The List index is which data entry point in the larger list.  Then set
         the object attribute to the key:value pair
         """
+        task_header = str(data_categories[0])
+        set_part_header = str(data_categories[1])
+        parent_build_header = str(data_categories[2])
+        start_date_header = str(data_categories[3])
+        end_date_header = str(data_categories[4])
+
         row_number = index + 2
         print(F'index {row_number}')
         specific_data = sorted_data[index]
-        objects.task_name = get_value(specific_data, 'task_name')
-        objects.set_part = get_value(specific_data, 'set_part')
-        objects.parent_build = get_value(specific_data, 'parent_build')
-        objects.start_date = get_value(specific_data, 'start_date')
-        objects.end_date = get_value(specific_data, 'due_date')
+        objects.task_name = get_value(specific_data, task_header,
+                                      data_categories)
+        objects.set_part = get_value(specific_data, set_part_header,
+                                     data_categories)
+        objects.parent_build = get_value(specific_data, parent_build_header,
+                                         data_categories)
+        objects.start_date = get_value(specific_data, start_date_header,
+                                       data_categories)
+        objects.end_date = get_value(specific_data, end_date_header,
+                                     data_categories)
+
+        objects.set_start_date()
+        objects.set_end_date()
         
+
         set_cell_value(ws, row_number, 1, objects.task_name)
         set_cell_value(ws, row_number, 2, objects.set_part)
         set_cell_value(ws, row_number, 3, objects.parent_build)
@@ -293,15 +316,20 @@ def date_to_check_from_excel():  # checks date, colors row red.
             try:
                 date_to_check = datetime.strptime(row[end_date_col-1], '%Y-%m-%d')
                 if date_to_check < datetime.now():
-                    # print(f'Row {row_num} has an End Date that has already passed: {date_to_check}')
+                    date_to_check = date_to_check.strftime("%Y-%m-%d")
+                    print(f'Row {row_num} has an End Date that has already'
+                          f' passed: {date_to_check}')
                     fill_row(row_num)
             except ValueError as e:
-                print(f'Error parsing date in row {row_num}: {e}')
+                if row_num == 1:
+                    continue
+                else:
+                    print(f'Error parsing date in row {row_num}: {e}')
     else:
         print('Could not find End Date column')
 
 
-def format_title():  # Format the titles / headers.
+def format_title(column_headers):  # Format the titles / headers.
     # Set the Title font.
     title_font = Font(name='Arial', size=20, color='ffffff')
 
@@ -310,7 +338,7 @@ def format_title():  # Format the titles / headers.
                              fill_type='solid')
 
     # Iterate through column_names.
-    for i, title in enumerate(column_names):
+    for i, title in enumerate(column_headers):
         column_letter = get_column_letter(i + 1)  # Get the column letter.
         column_number = column_letter + '1'
 
@@ -368,51 +396,69 @@ def check_unavailable_data():  # Search for data with no entry point.
                 # Apply the formatting.
                 cell.font = font_change
 
-def format_data():
-    format_title()  # Change Headers on columns.
+
+def format_data(column_headers):
+    format_title(column_headers)  # Change Headers on columns.
     date_to_check_from_excel()  # Color row red if date has passed.
     center_align_cells(ws)  # Center all data.
-    right_align_column_a() # Make task name adjusted to the right.
+    right_align_column_a()  # Make task name adjusted to the right.
 
     columns = ['A', 'B', 'C', 'D', 'E']
     for column in columns:
         autofit_columns(column)  # Scale column width.
 
-    check_unavailable_data() # Highlight the missing data.
-
-
-
+    check_unavailable_data()  # Highlight the missing data.
 
 ##############################################################################
 ##############################################################################
+
 
 if __name__ == '__main__':
-    print('\nStarting Script\n')  # Only for testing purposes--------------.
-    a = CapturedData('a1', 'build', 'roof', 'horace', '2016-12-05', '2017-1-23')
-    a.print_status()
+    """
+    Script Outline.
+    1. Check if file is a valid file type.
+    2. Create an excel file and fill in the titles.
+    3. Bring in the file that runs with the script to convert.
+    4. Process data.
+    5. Format data.
+    6. Save File
+    """
+    if len(sys.argv) > 1:
+        if check_file_type(sys.argv[1]):
+            print('\nStarting Script\n')  # Only for testing purposes--------.
+        else:
+            print(F'This file type cannot be converted with this script.')
+    else:
+        print('\n======================================================')
+        print('There was no file passed.\nPlease run the command like:')
+        print('python3 {file_path_name} {file_to_process_path}')
+        print('======================================================\n')
 
 
-    # Create an excel file using the file name of the data to be processed.
+    """ Variables to change for different type of data sheets. """
+    column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date',
+                    'End Date']
+    
+    # 1. Create an excel file using the file name of the data to be processed.
     wb = Workbook()  # Create a workbook.
     ws = wb.active  # Add worksheet.
     ws.title = 'Formatted'  # Change title.
 
-    # Pass titles from column_names list to excel.
-    for i in range(1,(len(column_names)+1)):
+    # Pass titles from column_names list intto excel.
+    for i in range(1, (len(column_names)+1)):
         title = str(column_names[i-1])
 
         set_cell_value(ws, 1, i, title)
 
-
+    
     # Input file when script is run through command line
     input_file = sys.argv[1]  # 'test_data.pkl'
 
     # Unpickle, sort, and set up excel file.
-    process_data(input_file)
+    process_data(input_file, column_names)
 
     # Select data in excel and format it.
-    format_data()
-    
+    format_data(column_names)
 
     # Create file name and save file.
     output_file = (input_file + '_converted_data.xlsx')
