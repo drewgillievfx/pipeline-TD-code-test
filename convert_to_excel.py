@@ -68,6 +68,7 @@ import sys
 """ Variables to change for different type of data sheets. """
 column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date', 'End Date']
 
+
 ##############################################################################
 """ 1. Defining the data class. """
 
@@ -214,7 +215,7 @@ def get_value(input_data, key_code):  # Find specific key-values.
     return returned_key
 
 
-def create_new_data_objects(data_in):
+def process_data(data_in):
     print('####################------##############')
     # Convert pickled data into a list.
     unpickled_data = open(data_in, 'rb')
@@ -240,8 +241,8 @@ def create_new_data_objects(data_in):
         The List index is which data entry point in the larger list.  Then set
         the object attribute to the key:value pair
         """
-        print(F'index {index}')
         row_number = index + 2
+        print(F'index {row_number}')
         specific_data = sorted_data[index]
         objects.task_name = get_value(specific_data, 'task_name')
         objects.set_part = get_value(specific_data, 'set_part')
@@ -258,18 +259,127 @@ def create_new_data_objects(data_in):
         objects.print_status()
         print(F'------------------------------------\n')
 
-"""
-Main function to process data with script. 
 
-An input file needs to be processed and automated so it creates and fills a 
-worksheet in excel.
-"""
+##############################################################################
+# 5. Format data
+""" This section of code is dedicated to reformatting the data on excel. """
 
-def process_data(file_to_process):
-    
-    # Create objects for each row of data.  Place data in excel.
-    create_new_data_objects(file_to_process)
-    
+
+def fill_row(selected_row):  # Give a row number to fill in red.
+    row_cells = ws[selected_row]  # Select row from input.
+
+    # Select the color red.
+    fill_color = PatternFill(start_color='FFC7CE',
+                             end_color='FFC7CE', fill_type='solid')
+    font_change = Font(name='Arial', size=12, color='8B0000')
+
+    # Set the fill color of all of the cells in the row.
+    for cell in row_cells:
+        cell.fill = fill_color
+        cell.font = font_change
+
+
+def date_to_check_from_excel():  # checks date, colors row red.
+    # Find the column number of the "End Date" column
+    end_date_col = None
+    for row in ws.iter_rows(values_only=True):
+        if 'End Date' in row:
+            end_date_col = row.index('End Date') + 1
+            break
+
+    # Check the date values in the "End Date" column
+    if end_date_col:
+        for row_num, row in enumerate(ws.iter_rows(values_only=True), start=1):
+            try:
+                date_to_check = datetime.strptime(row[end_date_col-1], '%Y-%m-%d')
+                if date_to_check < datetime.now():
+                    # print(f'Row {row_num} has an End Date that has already passed: {date_to_check}')
+                    fill_row(row_num)
+            except ValueError as e:
+                print(f'Error parsing date in row {row_num}: {e}')
+    else:
+        print('Could not find End Date column')
+
+
+def format_title():  # Format the titles / headers.
+    # Set the Title font.
+    title_font = Font(name='Arial', size=20, color='ffffff')
+
+    # Set Title fill.
+    title_fill = PatternFill(start_color='000000', end_color='000000',
+                             fill_type='solid')
+
+    # Iterate through column_names.
+    for i, title in enumerate(column_names):
+        column_letter = get_column_letter(i + 1)  # Get the column letter.
+        column_number = column_letter + '1'
+
+        # Apply the formatting.
+        ws[column_number].font = title_font
+        ws[column_number].fill = title_fill
+
+
+def center_align_cells(worksheet):  # Alaign data to center.
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.alignment = Alignment(horizontal='center')
+
+
+def right_align_column_a():  # Aligns first column data to right.
+    for row in ws.iter_rows(min_row=1, max_col=1):
+        for cell in row:
+            if cell.row != 1:
+                cell.alignment = Alignment(horizontal='right',
+                                           vertical='center')
+
+
+def autofit_columns(column_number):  # Adjust column width based on max cell.
+    max_size = 0  # Initialize the max size.
+
+    # Iterate through cells in the column.
+    for cell in ws[column_number]:
+        # Get the length of the cell value and font size.
+        length = len(str(cell.value))
+        font_size = cell.font.size
+        max_size = max(max_size, length + font_size)
+
+    average_size = 15  # Guess and check to see how it looks.
+    new_column_size = ((average_size + max_size) / 2) - 2
+
+    # print(max_size)  # Only for testing purposes---.
+    ws.column_dimensions[column_number].width = new_column_size
+
+
+def check_unavailable_data():  # Search for data with no entry point.
+    # Set the destination font change.
+    font_change = Font(name='Arial', size=12, color='8B0000',
+                       bold=True, italic=True)
+
+    """
+    Search all of the data to find 'Not available'.
+    This strange error is documented, but all instances of 'Not available'
+    must be a lower case 'a'.
+
+    When 'Not available' is found, set the font change.
+    """
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value == 'Not available':
+                # Apply the formatting.
+                cell.font = font_change
+
+def format_data():
+    format_title()  # Change Headers on columns.
+    date_to_check_from_excel()  # Color row red if date has passed.
+    center_align_cells(ws)  # Center all data.
+    right_align_column_a() # Make task name adjusted to the right.
+
+    columns = ['A', 'B', 'C', 'D', 'E']
+    for column in columns:
+        autofit_columns(column)  # Scale column width.
+
+    check_unavailable_data() # Highlight the missing data.
+
 
 
 
@@ -301,8 +411,7 @@ if __name__ == '__main__':
     process_data(input_file)
 
     # Select data in excel and format it.
-    # format_data()
-    
+    format_data()
     
 
     # Create file name and save file.
