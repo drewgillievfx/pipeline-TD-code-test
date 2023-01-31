@@ -16,6 +16,7 @@ from OpenImageIO import ImageSpec
 from OpenImageIO import ImageInput
 from OpenImageIO import ImageOutput
 from OpenImageIO import ImageBuf
+from OpenImageIO import ImageBufAlgo
 import numpy as np
 import sys 
 
@@ -63,8 +64,6 @@ def composite(image):
 
 
 
-
-
 ##############################################################################
 ##############################################################################
 
@@ -74,9 +73,7 @@ if __name__ == '__main__':
     Script Outline.
     1. 
     """
-    
-    
-    
+
     
     print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
     ##########################################################################
@@ -97,6 +94,7 @@ if __name__ == '__main__':
 
     ## in
     buf = ImageBuf(input_image)  # Create an image buffer from file 
+
     print (F'\n===================================================')
     print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
     print (F'File Format is {buf.file_format_name} ')
@@ -110,16 +108,23 @@ if __name__ == '__main__':
 
     print (F'roi is {buf.roi}\n')
 
-    # New Crop Size
+    # Set difference of input image and what the cropped image should be.
     delta_x = int((buf.spec().width - crop_res_x) / 2)
     delta_y = int((buf.spec().height - crop_res_y) / 2)
-    print (F'deltaX is {delta_x} ')
-    print (F'deltaY is {delta_y} \n')
+    print (F'deltaX is {delta_x} deltaY is {delta_y} \n')
 
     # set pixels to blue in the area needed.
     for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
         for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
             buf.setpixel (x, y, (0.0, 0.0, 1.0))
+
+    ##########################################################################
+
+    # pixels = np.zeros((2048, 858, 3), dtype = np.float32)
+    
+
+    # Draw a red rectangle into buf
+    # ImageBufAlgo.fill (buf, (1,0,0), buf.roi(50, 100, 75, 85))
 
     # Crop Size.
     # buf.spec().width = 2048
@@ -130,13 +135,18 @@ if __name__ == '__main__':
     # buf.spec().height = 1080
     print (F'\n===================================================')
 
-    print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
+    print (F'Final Resolution is {buf.spec().width} x {buf.spec().height}')
+    ##########################################################################
 
-    ## out
-    buf.write(output_filename)
+    """ Composite foreground and background. """
+    fg = ImageBuf('test1.exr') 
+    bg = buf 
+    dest = ImageBufAlgo.over(fg,bg)
+    ##########################################################################
+    """ Final writing of image and saving file. """
+    # buf.write(output_filename)
+    dest.write(output_filename)
     
-    # print(F'\nbuf in: {cropped_out}')  # Only for testing purposes---.
-    # print(F'\nbuf out: {output_filename}')  # Only for testing purposes---.
     ##########################################################################
 
 
