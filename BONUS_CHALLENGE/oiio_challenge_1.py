@@ -13,20 +13,53 @@ Written by: Drew Gillie
 
 import OpenImageIO as oiio
 from OpenImageIO import ImageSpec
-import sys
+from OpenImageIO import ImageInput
+from OpenImageIO import ImageOutput
+from OpenImageIO import ImageBuf
 import numpy as np
 import sys 
 
 ##############################################################################
 
-# def matte(image):
-#     # Create a black image buffer with the desired frame size
-#     black_img = oiio.ImageBuf(oiio.ImageSpec(2048, 1080, 3, oiio.FLOAT))
-#     black_img.fill((0, 0, 0))
+def crop(image):
+    # Create a black image buffer with the desired frame size
+    black_img = oiio.ImageBuf(oiio.ImageSpec(2048, 1080, 3, oiio.FLOAT))
+    black_img.fill((0, 0, 0))
 
-#     # Paste the resized image onto the black image buffer
-#     img_start = (0, 111)
-#     black_img.insert(img, img_start[0], img_start[1])
+    # Paste the resized image onto the black image buffer
+    img_start = (0, 111)
+    black_img.insert(img, img_start[0], img_start[1])
+
+    
+
+    # buf.xbegin = 150
+    # buf.xend = 2198
+    # buf.ybegin = 354
+    # buf.yend = 1212
+
+
+def matte(matte_name, width, height):
+    # Create a black image buffer with the desired frame size
+    channels = 3  # RGB
+    pixels = np.zeros((height, width, channels), dtype=np.uint8)
+
+
+    out = oiio.ImageOutput.create(matte_name)
+    spec = ImageSpec(width, height, channels, 'unit8')
+    out.open(matte_name, spec)
+    out.write_image(pixels)
+    out.close()
+
+    
+
+def composite(image):
+    # Create a black image buffer with the desired frame size
+    black_img = oiio.ImageBuf(oiio.ImageSpec(2048, 1080, 3, oiio.FLOAT))
+    black_img.fill((0, 0, 0))
+
+    # Paste the resized image onto the black image buffer
+    img_start = (0, 111)
+    black_img.insert(img, img_start[0], img_start[1])
 
 
 
@@ -48,78 +81,145 @@ if __name__ == '__main__':
     print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
     ##########################################################################
     """ File Handling. """
-    input_image = sys.argv[1]  
-    filename = "bars.jpg"
-    xres = 2048
-    yres = 1080
-    channels = 3  # RGB
-    pixels = np.zeros((yres, xres, channels), dtype=np.uint8)
+    input_image = sys.argv[1]  # Input Image.
+    cropped_out = ('CROPPED_' + input_image)  # For Testing Purposes.
+    matte_out = ('MATTE_' + input_image)  # For Testing Purposes.
+    output_filename = ('FINAL_' + input_image)  # Final Result.
 
 
-    out = oiio.ImageOutput.create(filename)
-    spec = ImageSpec(xres, yres, channels, 'unit8')
-    out.open(filename, spec)
-    out.write_image(pixels)
-    out.close()
+    """ Crop Resolution. """
+    crop_res_x = 2048
+    crop_res_y = 858
+
+    ##########################################################################
+    
+    # matte(matte_out, 2048, 1080)  # Returns a black image in RGB
+
+    ## in
+    buf = ImageBuf(input_image)  # Create an image buffer from file 
+    print (F'\n===================================================')
+    print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
+    print (F'File Format is {buf.file_format_name} ')
+    print (F'File Name is {buf.name} \n')
+
+    print (F'xbegin is {buf.xbegin} --> {buf.xend}')
+    print (F'ybegin is {buf.ybegin} --> {buf.yend}\n')
+
+    print (F'Xmin is {buf.xmin} --> {buf.xmax}')
+    print (F'Ymin is {buf.ymin} --> {buf.ymax}\n')
+
+    print (F'roi is {buf.roi}\n')
+
+    # New Crop Size
+    delta_x = int((buf.spec().width - crop_res_x) / 2)
+    delta_y = int((buf.spec().height - crop_res_y) / 2)
+    print (F'deltaX is {delta_x} ')
+    print (F'deltaY is {delta_y} \n')
+
+    # set pixels to blue in the area needed.
+    for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
+        for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
+            buf.setpixel (x, y, (0.0, 0.0, 1.0))
+
+    # Crop Size.
+    # buf.spec().width = 2048
+    # buf.spec().height = 858
+
+    # Final Crop Size.
+    # buf.spec().width = 2048
+    # buf.spec().height = 1080
+    print (F'\n===================================================')
+
+    print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
+
+    ## out
+    buf.write(output_filename)
+    
+    # print(F'\nbuf in: {cropped_out}')  # Only for testing purposes---.
+    # print(F'\nbuf out: {output_filename}')  # Only for testing purposes---.
+    ##########################################################################
 
 
-    # input_filename = input_image  # Input Image.
-    # cropped_out = ('CROPPED_' + input_image)  # For Testing Purposes.
-    # matte_out = ('MATTE_' + input_image)  # For Testing Purposes.
-    # output_filename = ('FINAL_' + input_image)  # Final Result.
+    # xorigin = fullwidth - cropwidth
+    # yorigin = fulllength - croplength    # Crop window position
 
-    # """ Crop Resolution. """
-    # crop_res_x = 2048
-    # crop_res_y = 858
+    # # pixels = np.zeros((croplength, cropwidth, 3), dtype="uint8")
+    
 
-    # # Open the input exr image.
-    # im = oiio.ImageBuf(input_filename)
+    # # spec = ImageSpec(cropwidth, croplength, 3, "uint8")
+    # # buf = ImageBuf(spec)  # Constructs a buffer for the image
 
-    # # Get the image dimmensions.
-    # width = im.spec().width
-    # height = im.spec().height
-    # print(F'Original width: {width}')
-    # print(F'Original height: {height}')
+    # buf.set_full (0, 1024, 0, 768, 0, 1)
+    # pixels = buf.get_pixels(oiio.FLOAT)
+    
+    # ImageBuf.xmin = xorigin
+    # ImageBuf.xmax = cropwidth + xorigin + 1  # must go 1 past max
+    # ImageBuf.ymin = yorigin
+    # ImageBuf.ymax = yorigin + yorigin + 1  # must go 1 past max
 
-    # # Set image new dimmensions
-    # # Find difference between resolution in and cropped resolution.
-    # delta_x = int((width - crop_res_x) / 2)
-    # delta_y = int((height - crop_res_y) / 2)
+    # # Set the whole image to red (the dumb slow way, but it works):
+    # for y in range(buf.ybegin, buf.yend) :
+    #     for x in range(buf.xbegin, buf.xend) :
+    #         buf.setpixel (x, y, (1.0, 0.0, 0.0))
 
-    # # Set width to final width
-    # width = width - (delta_x*2)
-    # height = height - (delta_y*2)
-    # print(F'New width: {width}')
-    # print(F'New height: {height}')
+    # buf.set_pixels(roi(), buf)
 
-    # # Matte the image with bars
-    # # final = matte(input_filename)
 
-    # # Get the ImageSpec of the image
-    # spec = im.spec()
+    # spec.full_x = 0
+    # spec.full_y = 0
 
-    # # Get the width, height, and number of channels of the image
-    # width = spec.width
-    # height = spec.height
-    # channels = spec.nchannels
+    # spec.width = fullwidth
+    # spec.width = fulllength
 
-    # # Get the channel names and data types of the image
-    # channel_names = spec.channelnames
-    # channel_types = spec.channelformats
-    # # Print the information
-    # print("Image dimensions:", width, "x", height)
-    # print("Number of channels:", channels)
-    # print("Channel names:", channel_names)
-    # print("Channel types:", channel_types)
+    # spec.x = xorigin
+    # spec.y = yorigin
 
-    # # Close the image file
-    # # im.close()
-    # # Save the cropped image as an output
-    # im.write(output_filename)
+    # out = ImageOutput.open(cropped_out, spec)
+
+    # z = 0   # Always zero for 2D images
+    # for y in range(yorigin, yorigin+croplength):
+    #     out.write_scanline(y, z, 'UINT8', pixels[y-origin:y-yorigin+1])
+    # out.close()
+
+
+# A = ImageBuf("A.tif")
+
+# # Make a separate, duplicate copy of A
+# B = A.copy()
+
+# # Make another copy of A, but converting to float pixels
+# C = A.copy ("float")
+
+# # Make another copy of A, but converting to float pixels
+# C = ImageBuf()
+# C.copy (A, oiio.FLOAT)
+
+
+
+    ##########################################################################
+
+
+    # fg =ImageBuf(im)
+    # bg =ImageBuf('foo.jpg')
+    # dst = ImageBufAlgo.over(bg, fg)
+
+    # Open the output image
+    # output_image = oiio.ImageOutput.create("cropped.exr")
+    # output_image.open(output_filename, spec)
+    # output_image.write(output_filename)
+
+    # Write the cropped image to the output file
+    # output_image.open(spec)
+    # output_image.write_image(oiio.FLOAT, im.channel(0, ybegin, xbegin))
+
+    # Close the input and output images
+    # im.close()
+    # output_image.close()
 
     # Output the final image as an sRGB JPEG
     # im.write(output_filename, oiio.JpgFormat(), {"color_space": "sRGB"})
-
+# spec = ImageSpec(width, length, channels, format)
+# spec.attribute ("oiio:ColorSpace", "scene_linear")
 
     ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
