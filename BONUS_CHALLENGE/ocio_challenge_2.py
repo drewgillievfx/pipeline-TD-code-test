@@ -9,3 +9,32 @@ Written by: Drew Gillie
     - Convert from .cr2 to ACEScg .exr file using dcraw - commit a sample file for verification
     - Convert that ACEScg exr file to an sRGB .jpeg - commit a sample file for verification
 """
+
+import PyOpenColorIO as OCIO
+import OpenImageIO as oiio
+
+
+##############################################################################
+
+
+
+
+
+
+
+##############################################################################
+##############################################################################
+
+
+if __name__ == '__main__':
+    """
+    Script Outline.
+    1. 
+    """
+    
+    print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
+    ##########################################################################
+
+
+    ##########################################################################
+    print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
