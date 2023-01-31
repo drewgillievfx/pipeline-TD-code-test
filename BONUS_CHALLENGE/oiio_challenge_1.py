@@ -41,13 +41,17 @@ def crop(image):
 
 
 def matte(matte_name, width, height):
+    print (F'File Name is {matte_name} \n')
+    print (F'Width {width} \n')
+    print (F'Height {height} \n')
+
     # Create a black image buffer with the desired frame size
-    channels = 3  # RGB
+    channels = 4  # RGB
     pixels = np.zeros((height, width, channels), dtype=np.uint8)
 
-
+    out = ImageBufAlgo.zero (ROI(0, width, 0, height, 0, 1, 0, 3))
     out = oiio.ImageOutput.create(matte_name)
-    spec = ImageSpec(width, height, channels, 'unit8')
+    spec = ImageSpec(width, height, 4, oiio.FLOAT)
     out.open(matte_name, spec)
     out.write_image(pixels)
     out.close()
@@ -56,8 +60,6 @@ def matte(matte_name, width, height):
 
 ##############################################################################
 ##############################################################################
-
-
 if __name__ == '__main__':
     """
     Script Outline.
@@ -79,10 +81,7 @@ if __name__ == '__main__':
     crop_res_y = 858
 
     ##########################################################################
-    # Returns a black image in RGB
-    matte(matte_out, 2048, 1080)
-    black_buf = ImageBuf(matte_out)
-
+    """ Loading Image into Buffer. """
     ## in
     buf = ImageBuf(input_image)  # Create an image buffer from file 
 
@@ -108,15 +107,32 @@ if __name__ == '__main__':
     crop_width = delta_x + crop_res_x
     crop_height = delta_y + crop_res_y
 
-    # set pixels to blue in the area needed.
-    for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
-        for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
-            buf.setpixel (x, y, (0.0, 0.0, 1.0))
+    # # Set pixels to blue in the area needed.
+    # for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
+    #     for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
+    #         buf.setpixel (x, y, (0.0, 0.0, 1.0))
 
     # Set B to be the upper left 200x100 region of A
     A = buf
-    B = ImageBufAlgo.crop(A, ROI(delta_x,crop_width,delta_y,crop_height))
+    B = ImageBufAlgo.crop(A, ROI(delta_x, crop_width, delta_y, crop_height))
     ##########################################################################
+    """ MATTE. """
+    # Returns a black image in RGB
+    matte(matte_out, 2048, 1080)
+    black_buf = ImageBuf(matte_out)
+    black_buf.write('black_buf.jpg')
+
+    # A = ImageBuf("A.tif")
+
+    # # Make a separate, duplicate copy of A
+    # B = A.copy()
+
+    # # Make another copy of A, but converting to float pixels
+    # C = A.copy ("float")
+
+    # # Make another copy of A, but converting to float pixels
+    # C = ImageBuf()
+    # C.copy (A, oiio.FLOAT)
 
 
     # Crop Size.
@@ -138,92 +154,10 @@ if __name__ == '__main__':
     ##########################################################################
     """ Final writing of image and saving file. """
     # buf.write(output_filename)
-    B.write(output_filename)
+    B.write(cropped_out)
     # dest.write(output_filename)
     
     ##########################################################################
-
-
-    # xorigin = fullwidth - cropwidth
-    # yorigin = fulllength - croplength    # Crop window position
-
-    # # pixels = np.zeros((croplength, cropwidth, 3), dtype="uint8")
-    
-
-    # # spec = ImageSpec(cropwidth, croplength, 3, "uint8")
-    # # buf = ImageBuf(spec)  # Constructs a buffer for the image
-
-    # buf.set_full (0, 1024, 0, 768, 0, 1)
-    # pixels = buf.get_pixels(oiio.FLOAT)
-    
-    # ImageBuf.xmin = xorigin
-    # ImageBuf.xmax = cropwidth + xorigin + 1  # must go 1 past max
-    # ImageBuf.ymin = yorigin
-    # ImageBuf.ymax = yorigin + yorigin + 1  # must go 1 past max
-
-    # # Set the whole image to red (the dumb slow way, but it works):
-    # for y in range(buf.ybegin, buf.yend) :
-    #     for x in range(buf.xbegin, buf.xend) :
-    #         buf.setpixel (x, y, (1.0, 0.0, 0.0))
-
-    # buf.set_pixels(roi(), buf)
-
-
-    # spec.full_x = 0
-    # spec.full_y = 0
-
-    # spec.width = fullwidth
-    # spec.width = fulllength
-
-    # spec.x = xorigin
-    # spec.y = yorigin
-
-    # out = ImageOutput.open(cropped_out, spec)
-
-    # z = 0   # Always zero for 2D images
-    # for y in range(yorigin, yorigin+croplength):
-    #     out.write_scanline(y, z, 'UINT8', pixels[y-origin:y-yorigin+1])
-    # out.close()
-
-
-# A = ImageBuf("A.tif")
-
-# # Make a separate, duplicate copy of A
-# B = A.copy()
-
-# # Make another copy of A, but converting to float pixels
-# C = A.copy ("float")
-
-# # Make another copy of A, but converting to float pixels
-# C = ImageBuf()
-# C.copy (A, oiio.FLOAT)
-
-
-
-    ##########################################################################
-
-
-    # fg =ImageBuf(im)
-    # bg =ImageBuf('foo.jpg')
-    # dst = ImageBufAlgo.over(bg, fg)
-
-    # Open the output image
-    # output_image = oiio.ImageOutput.create("cropped.exr")
-    # output_image.open(output_filename, spec)
-    # output_image.write(output_filename)
-
-    # Write the cropped image to the output file
-    # output_image.open(spec)
-    # output_image.write_image(oiio.FLOAT, im.channel(0, ybegin, xbegin))
-
-    # Close the input and output images
-    # im.close()
-    # output_image.close()
-
-    # Output the final image as an sRGB JPEG
-    # im.write(output_filename, oiio.JpgFormat(), {"color_space": "sRGB"})
-# spec = ImageSpec(width, length, channels, format)
-# spec.attribute ("oiio:ColorSpace", "scene_linear")
-
-    ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
+
+   
