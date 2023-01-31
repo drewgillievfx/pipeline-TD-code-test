@@ -17,6 +17,7 @@ from OpenImageIO import ImageInput
 from OpenImageIO import ImageOutput
 from OpenImageIO import ImageBuf
 from OpenImageIO import ImageBufAlgo
+from OpenImageIO import ROI
 import numpy as np
 import sys 
 
@@ -53,17 +54,6 @@ def matte(matte_name, width, height):
 
     
 
-def composite(image):
-    # Create a black image buffer with the desired frame size
-    black_img = oiio.ImageBuf(oiio.ImageSpec(2048, 1080, 3, oiio.FLOAT))
-    black_img.fill((0, 0, 0))
-
-    # Paste the resized image onto the black image buffer
-    img_start = (0, 111)
-    black_img.insert(img, img_start[0], img_start[1])
-
-
-
 ##############################################################################
 ##############################################################################
 
@@ -89,8 +79,9 @@ if __name__ == '__main__':
     crop_res_y = 858
 
     ##########################################################################
-    
-    # matte(matte_out, 2048, 1080)  # Returns a black image in RGB
+    # Returns a black image in RGB
+    matte(matte_out, 2048, 1080)
+    black_buf = ImageBuf(matte_out)
 
     ## in
     buf = ImageBuf(input_image)  # Create an image buffer from file 
@@ -107,24 +98,26 @@ if __name__ == '__main__':
     print (F'Ymin is {buf.ymin} --> {buf.ymax}\n')
 
     print (F'roi is {buf.roi}\n')
-
+    ##########################################################################
+    """ CROPPING. """
     # Set difference of input image and what the cropped image should be.
     delta_x = int((buf.spec().width - crop_res_x) / 2)
     delta_y = int((buf.spec().height - crop_res_y) / 2)
     print (F'deltaX is {delta_x} deltaY is {delta_y} \n')
+
+    crop_width = delta_x + crop_res_x
+    crop_height = delta_y + crop_res_y
 
     # set pixels to blue in the area needed.
     for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
         for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
             buf.setpixel (x, y, (0.0, 0.0, 1.0))
 
+    # Set B to be the upper left 200x100 region of A
+    A = buf
+    B = ImageBufAlgo.crop(A, ROI(delta_x,crop_width,delta_y,crop_height))
     ##########################################################################
 
-    # pixels = np.zeros((2048, 858, 3), dtype = np.float32)
-    
-
-    # Draw a red rectangle into buf
-    # ImageBufAlgo.fill (buf, (1,0,0), buf.roi(50, 100, 75, 85))
 
     # Crop Size.
     # buf.spec().width = 2048
@@ -145,7 +138,8 @@ if __name__ == '__main__':
     ##########################################################################
     """ Final writing of image and saving file. """
     # buf.write(output_filename)
-    dest.write(output_filename)
+    B.write(output_filename)
+    # dest.write(output_filename)
     
     ##########################################################################
 
