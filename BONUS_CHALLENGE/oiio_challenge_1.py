@@ -53,7 +53,7 @@ def matte(matte_name, width, height):
     out = oiio.ImageOutput.create(matte_name)
     spec = ImageSpec(width, height, 4, oiio.FLOAT)
     out.open(matte_name, spec)
-    out.write_image(pixels)
+    # out.write_image(pixels)
     out.close()
 
     
@@ -107,20 +107,37 @@ if __name__ == '__main__':
     crop_width = delta_x + crop_res_x
     crop_height = delta_y + crop_res_y
 
-    # # Set pixels to blue in the area needed.
-    # for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
-    #     for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
-    #         buf.setpixel (x, y, (0.0, 0.0, 1.0))
+    # Set pixels to blue in the area needed.
+    for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
+        for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
+            buf.setpixel (x, y, (0.0, 0.0, 1.0))
 
     # Set B to be the upper left 200x100 region of A
     A = buf
     B = ImageBufAlgo.crop(A, ROI(delta_x, crop_width, delta_y, crop_height))
+    print (F'\n===================================================')
+
     ##########################################################################
     """ MATTE. """
+    final_res_x = 2048
+    final_res_y = 1080
     # Returns a black image in RGB
-    matte(matte_out, 2048, 1080)
+    matte(matte_out, final_res_x, final_res_y)  # Create a photo all black 
     black_buf = ImageBuf(matte_out)
-    black_buf.write('black_buf.jpg')
+    black_buf.write('black_buf.exr')
+
+    print (F'{matte_out} has been created \n')
+
+    
+    final_delta_x = final_res_x - crop_res_x
+    final_delta_y = final_res_y - crop_res_y
+
+
+    fg = B  # Feed cropped image here.
+    fg.set_origin (final_delta_x, final_delta_y)  # Set where cropped image should start.
+    bg = ImageBuf (input_image)  # Set background to black pixels.
+    comp = ImageBufAlgo.over (fg, bg)  # Overlay photos.
+    comp.write('composite.exr')  # Save file as.
 
     # A = ImageBuf("A.tif")
 
@@ -142,19 +159,18 @@ if __name__ == '__main__':
     # Final Crop Size.
     # buf.spec().width = 2048
     # buf.spec().height = 1080
-    print (F'\n===================================================')
 
-    print (F'Final Resolution is {buf.spec().width} x {buf.spec().height}')
+    # print (F'Final Resolution is {buf.spec().width} x {buf.spec().height}')
     ##########################################################################
 
     """ Composite foreground and background. """
-    fg = ImageBuf('test1.exr') 
-    bg = buf 
-    dest = ImageBufAlgo.over(fg,bg)
+    # fg = ImageBuf('test1.exr') 
+    # bg = buf 
+    # dest = ImageBufAlgo.over(fg,bg)
     ##########################################################################
     """ Final writing of image and saving file. """
     # buf.write(output_filename)
-    B.write(cropped_out)
+    B.write(output_filename)
     # dest.write(output_filename)
     
     ##########################################################################
