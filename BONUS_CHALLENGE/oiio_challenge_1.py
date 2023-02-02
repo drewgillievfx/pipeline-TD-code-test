@@ -4,10 +4,13 @@ Start Date: 20230131
 Version: 1.0
 Written by: Drew Gillie
 
-1. Write a script that uses OIIO/OCIO to do the following operations on laika_framing_chart.exr
+1. Write a script that uses OIIO/OCIO to do the following operations on
+laika_framing_chart.exr
     - Crop from 2348x1566 to 2048x858
-    - Matte the 2048x858 image into a 2048x1080 frame with black bars top and bottom
-    - Output this resulting 2048x1080 image as an sRGB jpeg - commit the output jpeg for verification
+    - Matte the 2048x858 image into a 2048x1080 frame with black bars top and
+    bottom
+    - Output this resulting 2048x1080 image as an sRGB jpeg - commit the output
+    jpeg for verification
 """
 
 
@@ -18,8 +21,9 @@ from OpenImageIO import ImageOutput
 from OpenImageIO import ImageBuf
 from OpenImageIO import ImageBufAlgo
 from OpenImageIO import ROI
+import PyOpenColorIO as ocio
 # import numpy as np
-import sys 
+import sys
 
 ##############################################################################
 """
@@ -29,20 +33,40 @@ of this script is acceptable, however this is not the best case scenario.
 """
 
 
+def convert(image_to_convert, cs_origin, cs_destination, save_as):
+    """ This function should take a linear .exr and convert to a sRGB .jpg """
+
+    image = image_to_convert  # 'test.exr'
+    color_space_origin = cs_origin  # 'linear'
+    destination_color_space = cs_destination  # 'sRGB'
+
+    Src = image
+    Dst = ImageBufAlgo.colorconvert(Src, color_space_origin,
+                                    destination_color_space)
+
+    if Dst.has_error:
+        print("Error was", Dst.geterror())
+    ok = Dst.write(save_as)
+    if not ok:
+        print("Error was", Dst.geterror())
+
+    return Dst
+
+
 def test_prints(buf):
-    print (F'\n===================================================')
-    print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
-    print (F'File Format is {buf.file_format_name} ')
-    print (F'File Name is {buf.name} \n')
-    print (F'Colorspace is {buf.spec()} \n')
+    print(F'\n===================================================')
+    print(F'Resolution is {buf.spec().width} x {buf.spec().height}')
+    print(F'File Format is {buf.file_format_name} ')
+    print(F'File Name is {buf.name} \n')
+    print(F'Colorspace is {buf.spec()} \n')
 
-    print (F'xbegin is {buf.xbegin} --> {buf.xend}')
-    print (F'ybegin is {buf.ybegin} --> {buf.yend}\n')
+    print(F'xbegin is {buf.xbegin} --> {buf.xend}')
+    print(F'ybegin is {buf.ybegin} --> {buf.yend}\n')
 
-    print (F'Xmin is {buf.xmin} --> {buf.xmax}')
-    print (F'Ymin is {buf.ymin} --> {buf.ymax}\n')
+    print(F'Xmin is {buf.xmin} --> {buf.xmax}')
+    print(F'Ymin is {buf.ymin} --> {buf.ymax}\n')
 
-    print (F'roi is {buf.roi}\n')
+    print(F'roi is {buf.roi}\n')
 
 
 def check_file_type(file_to_check):
@@ -54,11 +78,13 @@ def check_file_type(file_to_check):
 
 def set_pixels_black(my_buffer):
     # Set pixels to black in the area needed. Lazy way, but it works better.
-    for y in range((my_buffer.ybegin), (my_buffer.yend)) :
-        for x in range((my_buffer.xbegin), (my_buffer.xend)) :
-            my_buffer.setpixel (x, y, (0.0, 0.0, 0.0))
+    for y in range((my_buffer.ybegin), (my_buffer.yend)):
+        for x in range((my_buffer.xbegin), (my_buffer.xend)):
+            my_buffer.setpixel(x, y, (0.0, 0.0, 0.0))
 ##############################################################################
 ##############################################################################
+
+
 if __name__ == '__main__':
     """
     Script Outline.
@@ -70,7 +96,6 @@ if __name__ == '__main__':
     6. Composite the cropped and matte images together
     """
 
-    
     print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
     ##########################################################################
     """ 1. File Handling. """
@@ -86,75 +111,62 @@ if __name__ == '__main__':
         print('python3 {file_path_name} {file_to_process_path}')
         print('======================================================\n')
 
-    input_image = sys.argv[1] 
+    input_image = sys.argv[1]
 
     # Set names for the output files.
     cropped_out = ('CROPPED_' + input_image)  # For Testing Purposes.
     cropped_out = cropped_out.replace('.exr', '.jpg')
-    
+
     matte_out = ('MATTE_' + input_image)  # For Testing Purposes.
     matte_out = matte_out.replace('.exr', '.jpg')
-    
+
     output_filename = ('FINAL_' + input_image)  # Final Result.
     output_filename = output_filename.replace('.exr', '.jpg')
-
 
     ##########################################################################
     """ 2. Loading Image into Buffer. """
     buf = ImageBuf(input_image)  # Create an image buffer from file.
 
     # test_prints(buf)
-    print (F'-- Finished Loading Photo.')
-
+    print(F'-- Finished Loading Photo.')
 
     ##########################################################################
     """ 3. CONVERTING LINEAR TO sRGB. """
-    color_space_origin = 'linear'
-    destination_color_space = 'sRGB'
+    converted_buf = convert(buf, 'linear', 'sRGB', output_filename)
 
-    Src = buf  # Set source to input file 
-    Dst = ImageBufAlgo.colorconvert(Src, color_space_origin, destination_color_space)  
+    print(F'-- Finished Color Conversion.')
 
-    if Dst.has_error :
-        print("Error was", Dst.geterror())
-    # ok = Dst.write('converted.jpg')  # For debugging new images.
-    ok = Dst.write(output_filename)  # For debugging new images.
-    if not ok:
-        print("Error was", Dst.geterror())
-    
-    print (F'-- Finished Color Conversion.')
-
-    # convert = ImageBuf(Dst)    
-    buf = Dst
-    
+    buf = converted_buf
 
     ##########################################################################
     """ 4. CROPPING. """
 
-    # Crop Resolution. 
+    # Crop Resolution.
     crop_res_x = 2048
     crop_res_y = 858
 
-    # Set difference of input image and what the cropped image should be.
+    # Find difference of input image and what the cropped image should be.
     delta_x = int((buf.spec().width - crop_res_x) / 2)
     delta_y = int((buf.spec().height - crop_res_y) / 2)
     # print (F'deltaX is {delta_x} deltaY is {delta_y} \n')
 
+    # Crop size = difference + crop resolution.
     crop_width = delta_x + crop_res_x
     crop_height = delta_y + crop_res_y
 
-    # Crop B to the specified region (should be 2048 x 858)
+    # Crop new buffer to the specified region (should be 2048 x 858)
     A = buf
-    cropped_buf = ImageBufAlgo.crop(A, ROI(delta_x, crop_width, delta_y, crop_height))
+    cropped_buf = ImageBufAlgo.crop(A, ROI(delta_x, crop_width, delta_y,
+                                    crop_height))
 
-    # Write the cropped image to file and check dimmensions
+    # Write the cropped image to file and check dimmensions.
     cropped_buf.write(output_filename)
 
-    print (F'-- Finished Cropping.')
-
+    print(F'-- Finished Cropping.')
 
     ##########################################################################
     """ 5. MATTE. """
+
     # Declare the matte resolution - should be the same as final resolution.
     final_res_x = 2048
     final_res_y = 1080
@@ -167,32 +179,26 @@ if __name__ == '__main__':
     M = black_buf.copy()
 
     # Set pixels to black in the area needed. Lazy way, but it works better.
-    set_pixels_black(M)  # Returns a black image in RGB
-    
+    set_pixels_black(M)
 
-    # print (F'{matte_out} has been created \n')
-    # print (F'Matte Width {final_res_x} Matte Height {final_res_y} \n')
-
-    
-    final_delta_x = final_res_x - crop_res_x
-    final_delta_y = final_res_y - crop_res_y
-    print (F'-- Finished Matte.')
-
+    print(F'-- Finished Matte.')
 
     ##########################################################################
     """ 6. Composite foreground and background. """
-    foreground =  ImageBuf(output_filename)  # Cropped image.
-    background = M #ImageBuf('test_5.jpg')  # Matte image.
+    foreground = ImageBuf(output_filename)  # Cropped image.
+    background = M  # ImageBuf('test_5.jpg')  # Matte image.
 
-    # Set where to composit at
+    # Set point to composite cropped image over matte.
+    final_delta_x = final_res_x - crop_res_x
+    final_delta_y = final_res_y - crop_res_y
+
     final_offset_y = int((final_res_y - crop_res_y) / 2)
-    
-    oiio.ImageBufAlgo.paste(background, 0,final_offset_y,0,0, foreground)
+
+    oiio.ImageBufAlgo.paste(background, 0, final_offset_y, 0, 0, foreground)
     # print (F'Paste at X: {delta_x}  Y: {delta_y} \n')
-       
-    # foreground.write('test_fg.jpg')
+
     background.write(output_filename)
-    print (F'-- Finished Composite.')
+    print(F'-- Finished Composite.')
 
     ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
