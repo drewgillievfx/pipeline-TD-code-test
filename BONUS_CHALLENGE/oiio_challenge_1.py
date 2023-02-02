@@ -18,7 +18,7 @@ from OpenImageIO import ImageOutput
 from OpenImageIO import ImageBuf
 from OpenImageIO import ImageBufAlgo
 from OpenImageIO import ROI
-import numpy as np
+# import numpy as np
 import sys 
 
 ##############################################################################
@@ -27,6 +27,22 @@ Currently, a lot of this code does not work when run through a function and is
 done in the main.  This might be doable if writing an image in the processing
 of this script is acceptable, however this is not the best case scenario.
 """
+
+
+def test_prints(buf):
+    print (F'\n===================================================')
+    print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
+    print (F'File Format is {buf.file_format_name} ')
+    print (F'File Name is {buf.name} \n')
+    print (F'Colorspace is {buf.spec()} \n')
+
+    print (F'xbegin is {buf.xbegin} --> {buf.xend}')
+    print (F'ybegin is {buf.ybegin} --> {buf.yend}\n')
+
+    print (F'Xmin is {buf.xmin} --> {buf.xmax}')
+    print (F'Ymin is {buf.ymin} --> {buf.ymax}\n')
+
+    print (F'roi is {buf.roi}\n')
 
 
 def check_file_type(file_to_check):
@@ -72,7 +88,7 @@ if __name__ == '__main__':
 
     input_image = sys.argv[1] 
 
-    # Set some names for the output files.
+    # Set names for the output files.
     cropped_out = ('CROPPED_' + input_image)  # For Testing Purposes.
     cropped_out = cropped_out.replace('.exr', '.jpg')
     
@@ -85,25 +101,10 @@ if __name__ == '__main__':
 
     ##########################################################################
     """ 2. Loading Image into Buffer. """
-    ## in
-    buf = ImageBuf(input_image)  # Create an image buffer from file 
+    buf = ImageBuf(input_image)  # Create an image buffer from file.
 
-    print (F'\n===================================================')
-    print (F'Resolution is {buf.spec().width} x {buf.spec().height}')
-    print (F'File Format is {buf.file_format_name} ')
-    print (F'File Name is {buf.name} \n')
-    # print (F'Colorspace is {buf.spec()} \n')
-
-    # print (F'xbegin is {buf.xbegin} --> {buf.xend}')
-    # print (F'ybegin is {buf.ybegin} --> {buf.yend}\n')
-
-    # print (F'Xmin is {buf.xmin} --> {buf.xmax}')
-    # print (F'Ymin is {buf.ymin} --> {buf.ymax}\n')
-
-    # print (F'roi is {buf.roi}\n')
-
-    # buf.write('test_2.jpg')
-    print (F'-- Finished opening photo.')
+    # test_prints(buf)
+    print (F'-- Finished Loading Photo.')
 
 
     ##########################################################################
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     if not ok:
         print("Error was", Dst.geterror())
     
-    print (F'-- Finished converting photo.')
+    print (F'-- Finished Color Conversion.')
 
     # convert = ImageBuf(Dst)    
     buf = Dst
@@ -137,7 +138,7 @@ if __name__ == '__main__':
     # Set difference of input image and what the cropped image should be.
     delta_x = int((buf.spec().width - crop_res_x) / 2)
     delta_y = int((buf.spec().height - crop_res_y) / 2)
-    print (F'deltaX is {delta_x} deltaY is {delta_y} \n')
+    # print (F'deltaX is {delta_x} deltaY is {delta_y} \n')
 
     crop_width = delta_x + crop_res_x
     crop_height = delta_y + crop_res_y
@@ -145,10 +146,8 @@ if __name__ == '__main__':
     # Crop B to the specified region (should be 2048 x 858)
     A = buf
     cropped_buf = ImageBufAlgo.crop(A, ROI(delta_x, crop_width, delta_y, crop_height))
-    print (F'\n===================================================')
 
     # Write the cropped image to file and check dimmensions
-    # cropped_buf.write(cropped_out)
     cropped_buf.write(output_filename)
 
     print (F'-- Finished Cropping.')
@@ -171,8 +170,8 @@ if __name__ == '__main__':
     set_pixels_black(M)  # Returns a black image in RGB
     
 
-    print (F'{matte_out} has been created \n')
-    print (F'Matte Width {final_res_x} Matte Height {final_res_y} \n')
+    # print (F'{matte_out} has been created \n')
+    # print (F'Matte Width {final_res_x} Matte Height {final_res_y} \n')
 
     
     final_delta_x = final_res_x - crop_res_x
