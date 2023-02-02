@@ -39,13 +39,19 @@ def convert(image_to_convert, cs_origin, cs_destination, save_as ):
     Src = ImageBuf(input_image)  
     Dst = ImageBufAlgo.colorconvert(Src, color_space_origin, destination_color_space)  
 
+    # Error checking.
     if Dst.has_error :
-        print("Error was", Dst.geterror())
+        print("Error was:", Dst.geterror())
+        print(F'\nTried Colorspace Conversion: {cs_origin} --> {cs_destination}')
+    else:
+        print(F'\nColorspace CONVERTED from {cs_origin} --> {cs_destination}')
+        print(F'Converted: {export_1}')
+
     ok = Dst.write(save_as)
     if not ok:
-        print("Error was", Dst.geterror())
-
-    print(F'\nColorspace Conversion from {cs_origin} --> {cs_destination}')
+        print("Error was:", Dst.geterror())
+    else:
+        print(F'SUCCSESS!')
     
 
 ##############################################################################
@@ -79,7 +85,7 @@ if __name__ == '__main__':
     export_1 = export_1.replace('.cr2', '.exr')
 
 
-    export_2 = ('sRGB' + input_image)
+    export_2 = ('sRGB_' + input_image)
     export_2 = export_2.replace('.cr2', '.jpg')
 
 
@@ -89,31 +95,30 @@ if __name__ == '__main__':
     print('\n---------- DCRAW ----------')
 
     # Call dcraw to convert the CR2 file to a TIFF file
-    subprocess.call(["dcraw", "-v", "-4", "-T", "-h", "-o", "0", "-b",
-                     "16", "-w", "-H", "0", "-d", input_image])
+    subprocess.call(["dcraw", "-v", "-4" "-o[6]", "-w", input_image])
     
     print('---------------------------\n')
 
     print(F'Photo to be processed: {input_image}')
-    tiff = input_image.replace('.cr2', '.tiff')
+    tiff = input_image.replace('.cr2', '.exr')
     # jpg = tiff.replace('.tiff', '.jpg')
     print(F'dcraw -->: {tiff}')
 
     ##########################################################################
     """ 3. Convert from raw into ACEScg. """
-    cs_1 = 'linear'
-    cs_2 = 'sRGB'
+    cs_1 = 'sRGB'
+    cs_2 = 'acescg'
 
-    convert(tiff, 'linear', 'sRGB', export_1 )
+    convert(tiff, cs_1, cs_2, export_1 )
     print(F'Commit 1: {export_1}')
 
     ##########################################################################
     """ 4. Convert from ACEScg to sRGB. """
-    cs_3 = 'linear'
+    cs_3 = 'acescg'
     cs_4 = 'sRGB'
 
-    convert(tiff, 'linear', 'sRGB', export_2 )
-    print(F'Commit 2: {export_2}')
+    # convert(tiff, cs_3, cs_4, export_2 )
+    # print(F'Commit 2: {export_2}')
    
 
     ##########################################################################
