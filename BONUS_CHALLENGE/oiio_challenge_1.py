@@ -26,11 +26,6 @@ import PyOpenColorIO as ocio
 import sys
 
 ##############################################################################
-"""
-Currently, a lot of this code does not work when run through a function and is
-done in the main.  This might be doable if writing an image in the processing
-of this script is acceptable, however this is not the best case scenario.
-"""
 
 
 def convert(image_to_convert, cs_origin, cs_destination, save_as):
