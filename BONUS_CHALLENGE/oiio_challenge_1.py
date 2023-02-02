@@ -82,8 +82,6 @@ if __name__ == '__main__':
     output_filename = ('FINAL_' + input_image)  # Final Result.
     output_filename = output_filename.replace('.exr', '.jpg')
 
-    print (F'-- Test 1: File Check.')
-
 
     ##########################################################################
     """ 2. Loading Image into Buffer. """
@@ -104,9 +102,8 @@ if __name__ == '__main__':
 
     # print (F'roi is {buf.roi}\n')
 
-    buf.write('test_2.jpg')
+    # buf.write('test_2.jpg')
     print (F'-- Finished opening photo.')
-    print (F'-- Test 2: Image Check.')
 
 
     ##########################################################################
@@ -119,7 +116,8 @@ if __name__ == '__main__':
 
     if Dst.has_error :
         print("Error was", Dst.geterror())
-    ok = Dst.write('converted.jpg')
+    # ok = Dst.write('converted.jpg')  # For debugging new images.
+    ok = Dst.write(output_filename)  # For debugging new images.
     if not ok:
         print("Error was", Dst.geterror())
     
@@ -127,9 +125,8 @@ if __name__ == '__main__':
 
     # convert = ImageBuf(Dst)    
     buf = Dst
-    buf.write('test_3.jpg')
-    print (F'-- Test 3: Conversion Check.')
     
+
     ##########################################################################
     """ 4. CROPPING. """
 
@@ -145,22 +142,17 @@ if __name__ == '__main__':
     crop_width = delta_x + crop_res_x
     crop_height = delta_y + crop_res_y
 
-    # # Set pixels to blue in the area needed. TESTING PURPOSES
-    # for y in range((buf.ybegin+delta_y), (buf.yend-delta_y)) :
-    #     for x in range((buf.xbegin+delta_x), (buf.xend-delta_x)) :
-    #         buf.setpixel (x, y, (0.0, 0.0, 1.0))
-
     # Crop B to the specified region (should be 2048 x 858)
     A = buf
     cropped_buf = ImageBufAlgo.crop(A, ROI(delta_x, crop_width, delta_y, crop_height))
     print (F'\n===================================================')
 
     # Write the cropped image to file and check dimmensions
-    cropped_buf.write(cropped_out)
+    # cropped_buf.write(cropped_out)
+    cropped_buf.write(output_filename)
+
     print (F'-- Finished Cropping.')
 
-    cropped_buf.write('test_4.jpg')
-    print (F'-- Test 4: Crop Check.')
 
     ##########################################################################
     """ 5. MATTE. """
@@ -173,16 +165,11 @@ if __name__ == '__main__':
     black_buf = ImageBuf(black)
 
     # Make a separate, duplicate copy of A
-    # M = B.copy()
+    M = black_buf.copy()
 
     # Set pixels to black in the area needed. Lazy way, but it works better.
-    matte = set_pixels_black(black_buf)  # Returns a black image in RGB
-    # set_pixels_black(M)  # Returns a black image in RGB
-    black_buf = ImageBuf(matte)
-
-    # black_buf.write(matte_out)
-    # matte.write(matte_out)
-    # M.write(matte_out)
+    set_pixels_black(M)  # Returns a black image in RGB
+    
 
     print (F'{matte_out} has been created \n')
     print (F'Matte Width {final_res_x} Matte Height {final_res_y} \n')
@@ -192,23 +179,21 @@ if __name__ == '__main__':
     final_delta_y = final_res_y - crop_res_y
     print (F'-- Finished Matte.')
 
-    black_buf.write('test_5.jpg')
-    print (F'-- Test 5: Matte Check.')
 
     ##########################################################################
     """ 6. Composite foreground and background. """
-    foreground = cropped_buf
-    background = black_buf
+    foreground =  ImageBuf(output_filename)  # Cropped image.
+    background = M #ImageBuf('test_5.jpg')  # Matte image.
 
     # Set where to composit at
-    roi = ROI(delta_x, crop_width, delta_y, crop_height)
-    composite = ImageBufAlgo.over(foreground,background)
-    composite.write(output_filename)
-    print (F'-- Finished Composite.')
-
+    final_offset_y = int((final_res_y - crop_res_y) / 2)
+    
+    oiio.ImageBufAlgo.paste(background, 0,final_offset_y,0,0, foreground)
+    # print (F'Paste at X: {delta_x}  Y: {delta_y} \n')
        
-    composite.write('test_6.jpg')
-    print (F'-- Test 6: Composite Check.')
+    # foreground.write('test_fg.jpg')
+    background.write(output_filename)
+    print (F'-- Finished Composite.')
 
     ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
