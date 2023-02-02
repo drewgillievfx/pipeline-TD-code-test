@@ -82,6 +82,8 @@ if __name__ == '__main__':
     output_filename = ('FINAL_' + input_image)  # Final Result.
     output_filename = output_filename.replace('.exr', '.jpg')
 
+    print (F'-- Test 1: File Check.')
+
 
     ##########################################################################
     """ 2. Loading Image into Buffer. """
@@ -101,9 +103,11 @@ if __name__ == '__main__':
     # print (F'Ymin is {buf.ymin} --> {buf.ymax}\n')
 
     # print (F'roi is {buf.roi}\n')
-    # buf.write(output_filename)
-    # buf.write('raw_exr_exported.jpg')
+
+    buf.write('test_2.jpg')
     print (F'-- Finished opening photo.')
+    print (F'-- Test 2: Image Check.')
+
 
     ##########################################################################
     """ 3. CONVERTING LINEAR TO sRGB. """
@@ -123,6 +127,8 @@ if __name__ == '__main__':
 
     # convert = ImageBuf(Dst)    
     buf = Dst
+    buf.write('test_3.jpg')
+    print (F'-- Test 3: Conversion Check.')
     
     ##########################################################################
     """ 4. CROPPING. """
@@ -153,48 +159,56 @@ if __name__ == '__main__':
     cropped_buf.write(cropped_out)
     print (F'-- Finished Cropping.')
 
+    cropped_buf.write('test_4.jpg')
+    print (F'-- Test 4: Crop Check.')
+
     ##########################################################################
-    # """ 5. MATTE. """
-    # # Declare the matte resolution - should be the same as final resolution.
-    # final_res_x = 2048
-    # final_res_y = 1080
+    """ 5. MATTE. """
+    # Declare the matte resolution - should be the same as final resolution.
+    final_res_x = 2048
+    final_res_y = 1080
 
-    # # Create an image in the buffer set at the final resolution
-    # black = ImageSpec(final_res_x, final_res_y, 4, "uint8")
-    # black_buf = ImageBuf(black)
+    # Create an image in the buffer set at the final resolution
+    black = ImageSpec(final_res_x, final_res_y, 4, "uint8")
+    black_buf = ImageBuf(black)
 
-    # # Make a separate, duplicate copy of A
-    # # M = B.copy()
+    # Make a separate, duplicate copy of A
+    # M = B.copy()
 
-    # # Set pixels to black in the area needed. Lazy way, but it works better.
-    # set_pixels_black(black_buf)  # Returns a black image in RGB
-    # # set_pixels_black(M)  # Returns a black image in RGB
+    # Set pixels to black in the area needed. Lazy way, but it works better.
+    matte = set_pixels_black(black_buf)  # Returns a black image in RGB
+    # set_pixels_black(M)  # Returns a black image in RGB
+    black_buf = ImageBuf(matte)
 
     # black_buf.write(matte_out)
-    # # matte.write(matte_out)
-    # # M.write(matte_out)
+    # matte.write(matte_out)
+    # M.write(matte_out)
 
-    # print (F'{matte_out} has been created \n')
-    # print (F'Matte Width {final_res_x} Matte Height {final_res_y} \n')
+    print (F'{matte_out} has been created \n')
+    print (F'Matte Width {final_res_x} Matte Height {final_res_y} \n')
 
     
-    # final_delta_x = final_res_x - crop_res_x
-    # final_delta_y = final_res_y - crop_res_y
-    # print (F'-- Finished Matte.')
+    final_delta_x = final_res_x - crop_res_x
+    final_delta_y = final_res_y - crop_res_y
+    print (F'-- Finished Matte.')
 
+    black_buf.write('test_5.jpg')
+    print (F'-- Test 5: Matte Check.')
 
     ##########################################################################
-    # """ 6. Composite foreground and background. """
-    # foreground = cropped_buf
-    # background = black_buf
+    """ 6. Composite foreground and background. """
+    foreground = cropped_buf
+    background = black_buf
 
-    # # Set where to composit at
-    # roi = ROI(delta_x, crop_width, delta_y, crop_height)
-    # composite = ImageBufAlgo.over(foreground,background, ROI(delta_x, crop_width, delta_y, crop_height))
-    # composite.write(output_filename)
-    # print (F'-- Finished Composite.')
+    # Set where to composit at
+    roi = ROI(delta_x, crop_width, delta_y, crop_height)
+    composite = ImageBufAlgo.over(foreground,background)
+    composite.write(output_filename)
+    print (F'-- Finished Composite.')
 
        
+    composite.write('test_6.jpg')
+    print (F'-- Test 6: Composite Check.')
 
     ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
