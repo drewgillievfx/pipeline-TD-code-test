@@ -1,11 +1,7 @@
 import PyOpenColorIO as ocio
 import OpenImageIO as oiio
-from OpenImageIO import ImageSpec
-from OpenImageIO import ImageInput
-from OpenImageIO import ImageOutput
 from OpenImageIO import ImageBuf
 from OpenImageIO import ImageBufAlgo
-from OpenImageIO import ROI
 import sys
 import subprocess
 
@@ -29,7 +25,7 @@ def check_file_type(file_to_check):
         return False
 
 
-def convert(image_to_convert, cs_origin, cs_destination, save_as ):
+def convert(image_to_convert, cs_origin, cs_destination, save_as, config ):
     """ This function should take a linear .exr and convert to a sRGB .jpg """
 
     input_image = image_to_convert  # 'test.exr'
@@ -37,7 +33,9 @@ def convert(image_to_convert, cs_origin, cs_destination, save_as ):
     destination_color_space = cs_destination  # 'sRGB'
 
     Src = ImageBuf(input_image)  
-    Dst = ImageBufAlgo.colorconvert(Src, color_space_origin, destination_color_space)  
+    Dst = ImageBufAlgo.colorconvert(Src, color_space_origin,
+                                    destination_color_space,
+                                    colorconfig=config)
 
     # Error checking.
     if Dst.has_error :
@@ -45,7 +43,7 @@ def convert(image_to_convert, cs_origin, cs_destination, save_as ):
         print(F'\nTried Colorspace Conversion: {cs_origin} --> {cs_destination}')
     else:
         print(F'\nColorspace CONVERTED from {cs_origin} --> {cs_destination}')
-        print(F'Converted: {export_1}')
+        print(F'Converted: {image_to_convert}')
 
     ok = Dst.write(save_as)
     if not ok:
@@ -64,7 +62,11 @@ if __name__ == '__main__':
     3. ACEScg exr file to an sRGB .jpeg
     4. commit sample
     """
+
+
     print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
+    config_file = '/Users/grayskull/OpenColorIO-Configs-master/aces_1.0.3/config.ocio'
+
     ##########################################################################
     """ 1. File Handling. """
     # Bring in the image through the terminal when this script is called.
@@ -100,26 +102,25 @@ if __name__ == '__main__':
     print('---------------------------\n')
 
     print(F'Photo to be processed: {input_image}')
-    tiff = input_image.replace('.cr2', '.exr')
+
+    after_dcraw = input_image.replace('.cr2', '.ppm')
     # jpg = tiff.replace('.tiff', '.jpg')
-    print(F'dcraw -->: {tiff}')
+    print(F'dcraw -->: {after_dcraw}')
 
     ##########################################################################
     """ 3. Convert from raw into ACEScg. """
-    cs_1 = 'sRGB'
-    cs_2 = 'acescg'
+    cs_1 = 'lin_srgb'
+    cs_2 = 'ACES - ACEScg'
 
-    convert(tiff, cs_1, cs_2, export_1 )
-    print(F'Commit 1: {export_1}')
+    # Takes image, source colorspace, destination colorspace, & save file name
+    convert(after_dcraw, cs_1, cs_2, export_1, config_file)
 
     ##########################################################################
     """ 4. Convert from ACEScg to sRGB. """
-    cs_3 = 'acescg'
-    cs_4 = 'sRGB'
+    cs_3 = 'ACES - ACEScg'
+    cs_4 = 'RGB'
 
-    # convert(tiff, cs_3, cs_4, export_2 )
-    # print(F'Commit 2: {export_2}')
-   
+    convert(export_1, cs_3, cs_4, export_2, config_file)
 
     ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
