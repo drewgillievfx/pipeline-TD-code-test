@@ -65,7 +65,8 @@ if __name__ == '__main__':
 
 
     print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
-    config_file = '/Users/grayskull/OpenColorIO-Configs-master/aces_1.0.3/config.ocio'
+    """ This will need to be replaced by whomever uses this script."""
+    config_file = '/Users/grayskull/Documents/GitHub/pipeline-TD-code-test/BONUS_CHALLENGE/aces_1.0.3/config.ocio'
 
     ##########################################################################
     """ 1. File Handling. """
@@ -83,12 +84,12 @@ if __name__ == '__main__':
 
     input_image = sys.argv[1]
 
-    export_1 = ('ACEScg_' + input_image)
+    export_1 = ('FINAL_ACEScg_' + input_image)
     export_1 = export_1.replace('.cr2', '.exr')
 
 
-    export_2 = ('sRGB_' + input_image)
-    export_2 = export_2.replace('.cr2', '.jpg')
+    export_2 = ('FINAL_sRGB_' + input_image)
+    export_2 = export_2.replace('.cr2', '.png')
 
 
     ##########################################################################
@@ -97,19 +98,20 @@ if __name__ == '__main__':
     print('\n---------- DCRAW ----------')
 
     # Call dcraw to convert the CR2 file to a TIFF file
-    subprocess.call(["dcraw", "-v", "-4" "-o[6]", "-w", input_image])
+    # subprocess.call(["dcraw", "-v", "-4", "-T", "-o[6]", "-w", input_image])
+    subprocess.call(["dcraw", "-v", "-4", "-h", "-o", "6", "-b", "16", "-w", 
+                     "-H", "0", "-d", input_image])
     
     print('---------------------------\n')
 
     print(F'Photo to be processed: {input_image}')
 
     after_dcraw = input_image.replace('.cr2', '.ppm')
-    # jpg = tiff.replace('.tiff', '.jpg')
     print(F'dcraw -->: {after_dcraw}')
 
     ##########################################################################
     """ 3. Convert from raw into ACEScg. """
-    cs_1 = 'lin_srgb'
+    cs_1 = 'Input - Generic - sRGB - Texture'
     cs_2 = 'ACES - ACEScg'
 
     # Takes image, source colorspace, destination colorspace, & save file name
@@ -118,7 +120,7 @@ if __name__ == '__main__':
     ##########################################################################
     """ 4. Convert from ACEScg to sRGB. """
     cs_3 = 'ACES - ACEScg'
-    cs_4 = 'RGB'
+    cs_4 = 'Output - sRGB'
 
     convert(export_1, cs_3, cs_4, export_2, config_file)
 
