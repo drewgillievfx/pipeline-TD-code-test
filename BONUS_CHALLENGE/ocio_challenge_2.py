@@ -4,7 +4,7 @@ from OpenImageIO import ImageBuf
 from OpenImageIO import ImageBufAlgo
 import sys
 import subprocess
-
+ 
 
 """
 2. Write a script that uses dcraw or other command line raw developing

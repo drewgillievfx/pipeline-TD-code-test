@@ -422,7 +422,7 @@ if __name__ == '__main__':
     4. Process data.
     5. Format data.
     6. Save File
-    """
+    """ 
     if len(sys.argv) > 1:
         if check_file_type(sys.argv[1]):
             print('\nStarting Script\n')  # Only for testing purposes--------.

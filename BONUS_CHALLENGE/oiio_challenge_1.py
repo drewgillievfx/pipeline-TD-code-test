@@ -11,7 +11,7 @@ laika_framing_chart.exr
     bottom
     - Output this resulting 2048x1080 image as an sRGB jpeg - commit the output
     jpeg for verification
-"""
+""" 
 
 
 import OpenImageIO as oiio
