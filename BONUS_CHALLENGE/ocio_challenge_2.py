@@ -18,38 +18,33 @@ software to process the provided raw file.
 
 
 """
-def check_file_type(file_to_check):
-    if file_to_check.endswith('.cr2'):
-        return True
-    else:
-        return False
 
 
-def convert(image_to_convert, cs_origin, cs_destination, save_as, config ):
+def convert(image_to_convert, color_space_origin, destination_color_space,
+            save_as, config ):
     """ This function should take a linear .exr and convert to a sRGB .jpg """
 
-    input_image = image_to_convert  # 'test.exr'
-    color_space_origin = cs_origin  # 'linear'
-    destination_color_space = cs_destination  # 'sRGB'
-
-    Src = ImageBuf(input_image)  
-    Dst = ImageBufAlgo.colorconvert(Src, color_space_origin,
-                                    destination_color_space,
-                                    colorconfig=config)
+    image_to_convert_buffer = ImageBuf(image_to_convert)  
+    converted_image = ImageBufAlgo.colorconvert(image_to_convert_buffer,
+                                                color_space_origin,
+                                                destination_color_space,
+                                                colorconfig=config)
 
     # Error checking.
-    if Dst.has_error :
-        print("Error was:", Dst.geterror())
-        print(F'\nTried Colorspace Conversion: {cs_origin} --> {cs_destination}')
+    if converted_image.has_error :
+        print("Error was:", converted_image.geterror())
+        print(F'\nTried Colorspace Conversion: ')
+        print(F'{color_space_origin} --> {destination_color_space}')
     else:
-        print(F'\nColorspace CONVERTED from {cs_origin} --> {cs_destination}')
+        print(F'\nColorspace CONVERTED from: ')
+        print(F'{color_space_origin} --> {destination_color_space}')
         print(F'Converted: {image_to_convert}')
 
-    ok = Dst.write(save_as)
+    ok = converted_image.write(save_as)
     if not ok:
-        print("Error was:", Dst.geterror())
+        print("Error was:", converted_image.geterror())
     else:
-        print(F'SUCCSESS!')
+        print(F'SUCCESS!')
     
 
 ##############################################################################
@@ -65,14 +60,18 @@ if __name__ == '__main__':
 
 
     print(F'\nSTARTING SCRIPT------------\n')  # Only for testing purposes---.
-    """ This will need to be replaced by whomever uses this script."""
+
+    """
+    This config filepath will need to be replaced by whomever uses this script.
+    For some reason, the entire path is needed.
+    """
     config_file = '/Users/grayskull/Documents/GitHub/pipeline-TD-code-test/BONUS_CHALLENGE/aces_1.0.3/config.ocio'
 
     ##########################################################################
     """ 1. File Handling. """
     # Bring in the image through the terminal when this script is called.
     if len(sys.argv) > 1:
-        if check_file_type(sys.argv[1]):
+        if sys.argv[1].endswith('.cr2'):
             print('Checking File....')  # Only for testing purposes--------.
         else:
             print(F'This file type cannot be used with this script.')
@@ -111,18 +110,19 @@ if __name__ == '__main__':
 
     ##########################################################################
     """ 3. Convert from raw into ACEScg. """
-    cs_1 = 'Input - Generic - sRGB - Texture'
-    cs_2 = 'ACES - ACEScg'
+    origin_colorspace = 'Input - Generic - sRGB - Texture'
+    intermediate_colorspace = 'ACES - ACEScg'
 
     # Takes image, source colorspace, destination colorspace, & save file name
-    convert(after_dcraw, cs_1, cs_2, export_1, config_file)
+    convert(after_dcraw, origin_colorspace, intermediate_colorspace,
+            export_1, config_file)
 
     ##########################################################################
     """ 4. Convert from ACEScg to sRGB. """
-    cs_3 = 'ACES - ACEScg'
-    cs_4 = 'Output - sRGB'
+    destination_colorspace = 'Output - sRGB'
 
-    convert(export_1, cs_3, cs_4, export_2, config_file)
+    convert(export_1, intermediate_colorspace, destination_colorspace,
+            export_2, config_file)
 
     ##########################################################################
     print(F'\nFINISHED SCRIPT------------\n')  # Only for testing purposes---.
