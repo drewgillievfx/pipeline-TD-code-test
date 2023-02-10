@@ -64,9 +64,6 @@ from openpyxl.styles import Alignment
 from openpyxl.styles import PatternFill
 import sys
 import os
-##############################################################################
-
-
 
 ##############################################################################
 """ 1. Defining the data class. """
@@ -106,12 +103,6 @@ class CapturedData:
 ##############################################################################
 """ 2. Create an excel file. """
 
-def check_file_type(file_to_check):
-    if file_to_check.endswith('.pkl'):
-        return True
-    else:
-        return False
-
 
 def set_cell_value(worksheet, row, col, value):
     cell = worksheet.cell(row=row, column=col)
@@ -123,7 +114,6 @@ def set_cell_value(worksheet, row, col, value):
         
     cell.value = converted_value
 
-
 ##############################################################################
 """ 3. Add data to excel file after fixing some data. """
 
@@ -132,14 +122,6 @@ This section of code is all about taking the input data from the .pkl
 file and converting it into simple lists.  The lists will then be added to
 excel.  Some issues will arise as some of the input data may return None.
 """
-
-
-def remove_brackets(input):
-    return str(input).strip('[]')
-
-
-def remove_quote(input):
-    return str(input).strip(" '' ")
 
 
 def catch_key(catch_list):  # Catch None error and return 'Not acailable'.
@@ -206,20 +188,17 @@ def get_value(input_data, key_code, title_list):  # Find specific key-values.
     # if the pair has a nested list, get the nested value
     if key_values[1] is not None:
         content_list = [input_data, key_values[0], key_values[1]]
-
-        # returned_key = input_data[key_values[0]][key_values[1]]
     else:  # get the normal value
         content_list = [input_data, key_values[0]]
 
-        # returned_key = input_data[key_values[0]]
     returned_key = catch_key(content_list)
 
     # Some data may not exist,
     if returned_key is None:
         returned_key = 'Not available'
 
-    returned_key = remove_brackets(returned_key)
-    returned_key = remove_quote(returned_key)
+    returned_key = str(returned_key).strip('[]')
+    returned_key = str(returned_key).strip(" '' ")
 
     return returned_key
 
@@ -258,6 +237,7 @@ def process_data(data_in, data_categories):
         row_number = index + 2
         print(F'index {row_number}')
         specific_data = sorted_data[index]
+
         objects.task_name = get_value(specific_data, task_header,
                                       data_categories)
         objects.set_part = get_value(specific_data, set_part_header,
@@ -403,7 +383,7 @@ def format_data(column_headers):
     center_align_cells(ws)  # Center all data.
     right_align_column_a()  # Make task name adjusted to the right.
 
-    columns = ['A', 'B', 'C', 'D', 'E']
+    columns = ['A', 'B', 'C', 'D', 'E']  # May need to change with diff data
     for column in columns:
         autofit_columns(column)  # Scale column width.
 
@@ -423,8 +403,9 @@ if __name__ == '__main__':
     5. Format data.
     6. Save File
     """ 
+    
     if len(sys.argv) > 1:
-        if check_file_type(sys.argv[1]):
+        if sys.argv[1].endswith('.pkl'):
             print('\nStarting Script\n')  # Only for testing purposes--------.
         else:
             print(F'This file type cannot be converted with this script.')
@@ -435,7 +416,7 @@ if __name__ == '__main__':
         print('======================================================\n')
 
 
-    """ Variables to change for different type of data sheets. """
+    """ Variables to change for different types of data sheets. """
     column_names = ['Task', 'Set Part', 'Parent Build', 'Start Date',
                     'End Date']
     
@@ -444,7 +425,7 @@ if __name__ == '__main__':
     ws = wb.active  # Add worksheet.
     ws.title = 'Formatted'  # Change title.
 
-    # Pass titles from column_names list intto excel.
+    # Pass titles from column_names list into excel.
     for i in range(1, (len(column_names)+1)):
         title = str(column_names[i-1])
 

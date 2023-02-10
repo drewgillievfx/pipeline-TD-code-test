@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     ##########################################################################
     """ 3. Convert from raw into ACEScg. """
-    origin_colorspace = 'Input - Generic - sRGB - Texture'
+    origin_colorspace = 'ACES'
     intermediate_colorspace = 'ACES - ACEScg'
 
     # Takes image, source colorspace, destination colorspace, & save file name
